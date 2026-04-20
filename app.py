@@ -703,35 +703,45 @@ if results:
         render_metric_card("Wasted Spend", format_currency(waste_summary.get("wasted_spend")), tone="bad")
 
     # Unlock form only once
-        if not st.session_state["unlock_complete"]:
-            st.markdown("### Unlock Your Branded Audit")
-            st.markdown("Submit your details and we will generate your branded Google Sheets audit.")
-    
-            lead_col1, lead_col2 = st.columns(2)
-            with lead_col1:
-                lead_name = st.text_input(
-                    "Full Name",
-                    value=st.session_state.get("lead_name", ""),
-                    key="unlock_name",
-                )
-                lead_email = st.text_input(
-                    "Work Email",
-                    value=st.session_state.get("lead_email", ""),
-                    key="unlock_email",
-                )
-            with lead_col2:
-                lead_phone = st.text_input(
-                    "Phone Number",
-                    value=st.session_state.get("lead_phone", ""),
-                    key="unlock_phone",
-                )
-                lead_brand_name = st.text_input(
-                    "Brand Name",
-                    value=brand_name or st.session_state.get("lead_brand_name", ""),
-                    key="unlock_brand",
-                )
-    
-            unlock_clicked = st.button("Unlock My Audit", use_container_width=True, key="unlock_button")
+            if not st.session_state["unlock_complete"]:
+                st.markdown("---")
+                st.markdown("### Unlock Your Branded Audit")
+                st.markdown("Submit your details and we will generate your branded Google Sheets audit.")
+        
+                unlock_shell_left, unlock_shell_center, unlock_shell_right = st.columns([1, 2.2, 1])
+        
+                with unlock_shell_center:
+                    lead_col1, lead_col2 = st.columns(2)
+        
+                    with lead_col1:
+                        lead_name = st.text_input(
+                            "Full Name",
+                            value=st.session_state.get("lead_name", ""),
+                            key="unlock_name",
+                        )
+                        lead_email = st.text_input(
+                            "Work Email",
+                            value=st.session_state.get("lead_email", ""),
+                            key="unlock_email",
+                        )
+        
+                    with lead_col2:
+                        lead_phone = st.text_input(
+                            "Phone Number",
+                            value=st.session_state.get("lead_phone", ""),
+                            key="unlock_phone",
+                        )
+                        lead_brand_name = st.text_input(
+                            "Brand Name",
+                            value=brand_name or st.session_state.get("lead_brand_name", ""),
+                            key="unlock_brand",
+                        )
+        
+                    unlock_clicked = st.button(
+                        "Unlock My Audit",
+                        use_container_width=True,
+                        key="unlock_button",
+                    )
     
             if unlock_clicked:
                 st.session_state["lead_name"] = lead_name
