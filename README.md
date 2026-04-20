@@ -1,4 +1,4 @@
-# Evolved Commerce Sales Audit Lead Magnet
+# Evolved Commerce Sales Audit Lead Magnet 
 
 This package contains a Cloud Run-ready Streamlit app that:
 - accepts Amazon Ads report uploads
