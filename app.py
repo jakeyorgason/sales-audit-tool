@@ -1,3 +1,4 @@
+
 import os
 from typing import Any, Optional
 
@@ -6,27 +7,36 @@ import requests
 import streamlit as st
 
 from sales_audit_ingestion import SalesAuditEngine
+from shared_ingestion_utils import to_excel_bytes_multi
 
 
 st.set_page_config(
-    page_title="Amazon Ads Audit | Evolved Commerce",
+    page_title="Free Amazon Ads Audit",
     page_icon="📊",
     layout="wide",
 )
 
 
 # =========================================================
-# SETTINGS / HELPERS
+# SESSION STATE
 # =========================================================
-def get_setting(name: str, default: Optional[str] = None) -> Optional[str]:
-    if name in os.environ:
-        return os.environ.get(name, default)
-    try:
-        return st.secrets[name]
-    except Exception:
-        return default
+DEFAULT_STATE = {
+    "sales_audit_results": {},
+    "created_report": None,
+    "unlock_complete": False,
+    "lead_name": "",
+    "lead_email": "",
+    "lead_phone": "",
+    "lead_brand_name": "",
+}
+for _k, _v in DEFAULT_STATE.items():
+    if _k not in st.session_state:
+        st.session_state[_k] = _v
 
 
+# =========================================================
+# HELPERS
+# =========================================================
 def safe_dict(value: Any) -> dict:
     return value if isinstance(value, dict) else {}
 
@@ -37,19 +47,11 @@ def safe_df(value: Any) -> pd.DataFrame:
 
 def get_number(value: Any, default: float = 0.0) -> float:
     try:
-        if value in (None, ""):
+        if value is None or value == "":
             return default
         return float(value)
-    except Exception:
+    except (TypeError, ValueError):
         return default
-
-
-def format_currency(value: Any) -> str:
-    return f"${get_number(value):,.2f}"
-
-
-def format_percent(value: Any) -> str:
-    return f"{get_number(value):,.2f}%"
 
 
 def load_logo_path() -> Optional[str]:
@@ -68,44 +70,122 @@ def load_logo_path() -> Optional[str]:
     return None
 
 
-def simplify_term_table(df: pd.DataFrame, term_col: str, limit: int = 10) -> pd.DataFrame:
+def format_currency(value: float) -> str:
+    return f"${get_number(value):,.2f}"
+
+
+def format_percent(value: float) -> str:
+    return f"{get_number(value):,.2f}%"
+
+
+def format_number(value: float) -> str:
+    return f"{get_number(value):,.2f}"
+
+
+def _spend_to_float(v: Any) -> float:
+    if v is None:
+        return 0.0
+    text = str(v).replace("$", "").replace(",", "").strip()
+    try:
+        return float(text)
+    except ValueError:
+        return 0.0
+
+
+def render_metric_card(label: str, value: str, tone: str = "brand", small: bool = False) -> None:
+    value_class = "metric-value small" if small else "metric-value"
+    st.markdown(
+        f"""
+        <div class="metric-card {tone}">
+            <div class="metric-label">{label}</div>
+            <div class="{value_class}">{value}</div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def tone_from_health(status: str) -> str:
+    status = str(status).strip().lower()
+    if status == "healthy":
+        return "good"
+    if status == "mixed":
+        return "warn"
+    return "bad"
+
+
+def simplify_term_table(df: pd.DataFrame, term_col: str) -> pd.DataFrame:
     if df is None or df.empty:
         return pd.DataFrame()
 
     out = df.copy()
+
     if "acos" in out.columns and "acos_pct" not in out.columns:
-        out["acos_pct"] = pd.to_numeric(out["acos"], errors="coerce").fillna(0) * 100
+        out["acos_pct"] = out["acos"] * 100
 
     keep_cols = [c for c in [term_col, "spend", "sales", "acos_pct"] if c in out.columns]
     out = out[keep_cols].copy()
-    out = out.rename(columns={term_col: "term", "acos_pct": "acos"})
 
-    for col in ["spend", "sales", "acos"]:
-        out[col] = pd.to_numeric(out[col], errors="coerce").fillna(0)
+    out = out.rename(columns={
+        term_col: "term",
+        "spend": "spend",
+        "sales": "sales",
+        "acos_pct": "acos",
+    })
 
-    out = out.sort_values(["spend", "sales"], ascending=[False, False]).head(limit).reset_index(drop=True)
+    out["spend"] = pd.to_numeric(out["spend"], errors="coerce").fillna(0)
+    out["sales"] = pd.to_numeric(out["sales"], errors="coerce").fillna(0)
+    out["acos"] = pd.to_numeric(out["acos"], errors="coerce").fillna(0)
+
     out["spend"] = out["spend"].map(lambda x: f"${x:,.2f}")
     out["sales"] = out["sales"].map(lambda x: f"${x:,.2f}")
     out["acos"] = out["acos"].map(lambda x: f"{x:,.2f}%")
-    return out
+
+    return out.reset_index(drop=True)
 
 
-def simplify_raw_for_sheet(df: pd.DataFrame, term_col: str, limit: int = 20) -> list[dict]:
+def build_sheet_term_table(df: pd.DataFrame, term_col: str) -> pd.DataFrame:
     if df is None or df.empty:
-        return []
+        return pd.DataFrame()
 
     out = df.copy()
+
     if "acos" in out.columns and "acos_pct" not in out.columns:
-        out["acos_pct"] = pd.to_numeric(out["acos"], errors="coerce").fillna(0) * 100
+        out["acos_pct"] = out["acos"] * 100
 
     keep_cols = [c for c in [term_col, "spend", "sales", "acos_pct"] if c in out.columns]
-    out = out[keep_cols].copy().rename(columns={term_col: "term", "acos_pct": "acos"})
+    out = out[keep_cols].copy()
 
-    for col in ["spend", "sales", "acos"]:
-        out[col] = pd.to_numeric(out[col], errors="coerce").fillna(0)
+    out = out.rename(columns={
+        term_col: "term",
+        "spend": "spend",
+        "sales": "sales",
+        "acos_pct": "acos",
+    })
 
-    out = out.sort_values(["spend", "sales"], ascending=[False, False]).head(limit).reset_index(drop=True)
-    return out.to_dict("records")
+    out["spend"] = pd.to_numeric(out["spend"], errors="coerce").fillna(0).round(2)
+    out["sales"] = pd.to_numeric(out["sales"], errors="coerce").fillna(0).round(2)
+    out["acos"] = pd.to_numeric(out["acos"], errors="coerce").fillna(0).round(2)
+
+    return out.reset_index(drop=True)
+
+
+def simplify_campaign_table(df: pd.DataFrame) -> pd.DataFrame:
+    if df is None or df.empty:
+        return pd.DataFrame()
+
+    out = df.copy()
+    keep = [c for c in ["campaign_name", "spend", "sales", "acos_pct", "campaign_status"] if c in out.columns]
+    out = out[keep].copy()
+
+    if "spend" in out.columns:
+        out["spend"] = pd.to_numeric(out["spend"], errors="coerce").fillna(0).round(2)
+    if "sales" in out.columns:
+        out["sales"] = pd.to_numeric(out["sales"], errors="coerce").fillna(0).round(2)
+    if "acos_pct" in out.columns:
+        out["acos_pct"] = pd.to_numeric(out["acos_pct"], errors="coerce").fillna(0).round(2)
+
+    return out.sort_values(["spend", "sales"], ascending=[False, False]).reset_index(drop=True)
 
 
 def normalize_records_for_sheet(df: pd.DataFrame) -> list[dict]:
@@ -113,20 +193,62 @@ def normalize_records_for_sheet(df: pd.DataFrame) -> list[dict]:
         return []
 
     out = df.copy()
+    out = out.replace({pd.NA: None})
     out = out.where(pd.notnull(out), None)
+
+    def parse_numeric_like(value):
+        if value is None:
+            return None
+        if isinstance(value, (int, float)):
+            return value
+
+        text = str(value).strip()
+        if text == "":
+            return None
+
+        negative = text.startswith("(") and text.endswith(")")
+        text = text.replace("(", "").replace(")", "")
+        text = text.replace("$", "").replace(",", "").replace("%", "").strip()
+
+        try:
+            num = float(text)
+            return -num if negative else num
+        except ValueError:
+            return value
 
     for col in out.columns:
         col_l = str(col).lower().strip()
-        if col_l in {"spend", "sales", "ad_sales", "total_sales", "organic_sales", "ntb_sales", "wasted_spend", "spend_no_sale"}:
-            out[col] = pd.to_numeric(out[col], errors="coerce").fillna(0).round(2)
+
+        out[col] = out[col].map(parse_numeric_like)
+
+        if col_l in {"ctr", "cvr", "acos", "acos_pct"}:
+            out[col] = (
+                pd.to_numeric(out[col], errors="coerce")
+                .fillna(0)
+                .map(lambda x: round(float(x) / 100.0, 6))
+            )
+
+        elif col_l in {"roas"}:
+            out[col] = pd.to_numeric(out[col], errors="coerce").fillna(0).map(lambda x: round(float(x), 2))
+
+        elif col_l in {"cpc"}:
+            out[col] = pd.to_numeric(out[col], errors="coerce").fillna(0).map(lambda x: round(float(x), 2))
+
+        elif col_l in {"spend", "sales", "ad_sales", "total_sales", "organic_sales", "ntb_sales"}:
+            out[col] = pd.to_numeric(out[col], errors="coerce").fillna(0).map(lambda x: round(float(x), 2))
+
         elif col_l in {"impressions", "clicks", "orders", "units_ordered", "sessions", "ntb_orders"}:
-            out[col] = pd.to_numeric(out[col], errors="coerce").fillna(0).round(0).astype(int)
-        elif col_l in {"ctr", "cvr", "acos", "acos_pct", "impression_share_pct", "tacos_pct", "organic_share_pct", "unit_session_percentage", "ntb_sales_pct", "ntb_orders_pct", "wasted_spend_pct"}:
-            out[col] = pd.to_numeric(out[col], errors="coerce").fillna(0).round(2)
-        elif col_l == "roas":
-            out[col] = pd.to_numeric(out[col], errors="coerce").fillna(0).round(2)
-        elif col_l == "cpc":
-            out[col] = pd.to_numeric(out[col], errors="coerce").fillna(0).round(2)
+            out[col] = pd.to_numeric(out[col], errors="coerce").fillna(0).map(lambda x: int(round(float(x))))
+
+        elif "pct" in col_l or "percent" in col_l:
+            out[col] = (
+                pd.to_numeric(out[col], errors="coerce")
+                .fillna(0)
+                .map(lambda x: round(float(x) / 100.0, 6))
+            )
+
+        elif pd.api.types.is_numeric_dtype(out[col]):
+            out[col] = pd.to_numeric(out[col], errors="coerce").fillna(0)
 
     return out.to_dict("records")
 
@@ -150,12 +272,9 @@ def create_google_sheet_report(
     targeting_data_rows: list[dict],
     search_term_data_rows: list[dict],
 ) -> dict:
-    webhook_url = get_setting("GOOGLE_SHEET_WEBHOOK_URL")
-    template_id = get_setting("GOOGLE_SHEETS_TEMPLATE_ID")
-    destination_folder_id = get_setting("GOOGLE_DRIVE_FOLDER_ID")
-
-    if not webhook_url or not template_id or not destination_folder_id:
-        raise RuntimeError("Google Sheet template or destination folder ID is not configured.")
+    webhook_url = st.secrets["APPS_SCRIPT_WEBHOOK_URL"]
+    template_id = st.secrets["GOOGLE_SHEETS_TEMPLATE_ID"]
+    destination_folder_id = st.secrets["GOOGLE_DRIVE_FOLDER_ID"]
 
     payload = {
         "templateId": template_id,
@@ -181,18 +300,12 @@ def create_google_sheet_report(
 
     response = requests.post(webhook_url, json=payload, timeout=180)
     response.raise_for_status()
+
     data = response.json()
     if not data.get("success"):
         raise RuntimeError(data.get("error", "Unknown Apps Script error"))
+
     return data
-
-
-def send_lead_webhook(lead_payload: dict) -> None:
-    webhook_url = get_setting("LEAD_WEBHOOK_URL")
-    if not webhook_url:
-        return
-    response = requests.post(webhook_url, json=lead_payload, timeout=30)
-    response.raise_for_status()
 
 
 # =========================================================
@@ -201,19 +314,113 @@ def send_lead_webhook(lead_payload: dict) -> None:
 st.markdown(
     """
     <style>
-        .main > div { padding-top: 1.0rem; }
-        .block-container { padding-top: 1rem; padding-bottom: 1.75rem; max-width: 1440px; }
-        [data-testid="stSidebar"] { background: #F3F4F6; }
-        .hero { background: linear-gradient(135deg, #EA580C 0%, #1F2937 100%); border-radius: 20px; padding: 28px 28px; color: white; margin-bottom: 1rem; }
-        .hero h1 { margin: 0; font-size: 2rem; }
-        .hero p { margin: .4rem 0 0 0; opacity: .96; }
-        .card-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin: 12px 0 18px; }
-        .mini-card { border:1px solid #ead8c2; border-radius:14px; padding:14px 16px; background:#fcf7f1; }
-        .section-title { font-size:1.2rem; font-weight:800; margin:.8rem 0 .25rem; }
-        .section-note { color:#6b7280; margin-bottom:.75rem; }
-        .metric { background:#fff; border:1px solid #ececec; border-radius:16px; padding:14px 16px; }
-        .metric-label { font-size:.75rem; font-weight:700; color:#6b7280; text-transform:uppercase; letter-spacing:.04em; }
-        .metric-value { font-size:1.4rem; font-weight:800; color:#1f2937; }
+        .main > div {
+            padding-top: 1.1rem;
+        }
+        .block-container {
+            padding-top: 1.1rem;
+            padding-bottom: 1.75rem;
+            max-width: 1440px;
+        }
+        [data-testid="stSidebar"] {
+            background: #F3F4F6;
+        }
+        .brand-shell {
+            background: linear-gradient(135deg, #EA580C 0%, #1F2937 100%);
+            border-radius: 20px;
+            padding: 50px 30px;
+            color: white;
+            margin-bottom: 1.25rem;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+        }
+        .brand-title {
+            font-size: 2.15rem;
+            font-weight: 800;
+            line-height: 1.05;
+            margin: 0;
+        }
+        .brand-subtitle {
+            font-size: 1rem;
+            opacity: 0.96;
+            margin-top: 0.55rem;
+        }
+        .section-title {
+            font-size: 1.18rem;
+            font-weight: 750;
+            color: #111827;
+            margin-bottom: 0.2rem;
+        }
+        .section-note {
+            font-size: 0.92rem;
+            color: #6b7280;
+            margin-bottom: 0.8rem;
+        }
+        .metric-card {
+            background: #ffffff;
+            border: 1px solid #ececec;
+            border-radius: 16px;
+            padding: 14px 16px;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04);
+            min-height: 98px;
+        }
+        .metric-label {
+            font-size: 0.75rem;
+            color: #6B7280;
+            margin-bottom: 0.25rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        .metric-value {
+            font-size: 1.5rem;
+            line-height: 1.1;
+            font-weight: 800;
+            color: #1F2937;
+            word-break: break-word;
+        }
+        .metric-value.small {
+            font-size: 1.1rem;
+        }
+        .metric-card.good { border-left: 4px solid #10B981; }
+        .metric-card.warn { border-left: 4px solid #F59E0B; }
+        .metric-card.bad { border-left: 4px solid #EF4444; }
+        .metric-card.brand { border-left: 4px solid #F47322; }
+        .status-pill {
+            display: inline-block;
+            padding: 8px 12px;
+            border-radius: 999px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            margin-bottom: 0.65rem;
+        }
+        .status-pill.good {
+            background: #ecfdf5;
+            color: #047857;
+            border: 1px solid #a7f3d0;
+        }
+        .status-pill.warn {
+            background: #fffbeb;
+            color: #b45309;
+            border: 1px solid #fde68a;
+        }
+        .status-pill.bad {
+            background: #fef2f2;
+            color: #b91c1c;
+            border: 1px solid #fecaca;
+        }
+        .summary-box {
+            background: #ffffff;
+            border: 1px solid #ececec;
+            border-radius: 16px;
+            padding: 16px 18px;
+            margin-bottom: 10px;
+        }
+        .upload-note {
+            color: #6b7280;
+            font-size: 0.9rem;
+            margin-top: -0.1rem;
+            margin-bottom: 0.55rem;
+        }
     </style>
     """,
     unsafe_allow_html=True,
@@ -233,7 +440,7 @@ with st.sidebar:
 - Sponsored Products Impression Share Report
 - Sales & Traffic Business Report
 - Sponsored Brands Campaign Report (optional)
-        """
+"""
     )
     st.markdown("---")
     st.markdown("## Notes")
@@ -242,16 +449,18 @@ with st.sidebar:
 - Keep the date ranges aligned where possible
 - The SB report helps populate new-to-brand metrics
 - Your uploaded data is only used to generate this audit
-        """
+"""
     )
     if st.button("Start over", use_container_width=True):
-        for key in [
-            "sales_audit_results",
-            "sales_audit_unlocked",
-            "sales_audit_created_report",
-            "sales_audit_error",
-        ]:
-            st.session_state.pop(key, None)
+        for k, v in DEFAULT_STATE.items():
+            st.session_state[k] = {} if isinstance(v, dict) else (None if v is None else v.__class__() if isinstance(v, (str, list)) else v)
+        st.session_state["sales_audit_results"] = {}
+        st.session_state["created_report"] = None
+        st.session_state["unlock_complete"] = False
+        st.session_state["lead_name"] = ""
+        st.session_state["lead_email"] = ""
+        st.session_state["lead_phone"] = ""
+        st.session_state["lead_brand_name"] = ""
         st.rerun()
 
 
@@ -259,21 +468,20 @@ with st.sidebar:
 # HEADER
 # =========================================================
 logo_path = load_logo_path()
-left, right = st.columns([1.25, 4.75], gap="medium")
-with left:
+header_left, header_right = st.columns([1.35, 5.65], gap="medium")
+
+with header_left:
     if logo_path:
-        st.image(logo_path, width=260)
-with right:
+        st.image(logo_path, width=500)
+
+with header_right:
     st.markdown(
         """
-        <div class="hero">
-            <h1>Free Amazon Ads Audit | Evolved Commerce</h1>
-            <p>Upload your recent Amazon reports and get a branded audit that highlights wasted spend, top opportunities, and winning terms.</p>
-        </div>
-        <div class="card-grid">
-            <div class="mini-card"><strong>1. Upload 5 reports</strong><br><span style="color:#6b7280">Recent reporting windows work best.</span></div>
-            <div class="mini-card"><strong>2. Run your audit</strong><br><span style="color:#6b7280">We process the reports and prepare your branded analysis.</span></div>
-            <div class="mini-card"><strong>3. Unlock results</strong><br><span style="color:#6b7280">Submit your details to receive the completed audit.</span></div>
+        <div class="brand-shell">
+            <div class="brand-title">Free Amazon Ads Audit</div>
+            <div class="brand-subtitle">
+                Upload your recent account reports and get a branded audit that highlights wasted spend, top opportunities, and winning terms.
+            </div>
         </div>
         """,
         unsafe_allow_html=True,
@@ -284,28 +492,37 @@ with right:
 # INPUTS
 # =========================================================
 st.markdown('<div class="section-title">Brand & Report Uploads</div>', unsafe_allow_html=True)
-st.markdown('<div class="section-note">Enter your brand name, then upload the required files.</div>', unsafe_allow_html=True)
+st.markdown(
+    '<div class="section-note">Enter your brand name, then upload the required files.</div>',
+    unsafe_allow_html=True,
+)
 
-brand_name = st.text_input("Brand Name", placeholder="Your brand name", key="sales_audit_brand_name")
+brand_name_input = st.text_input(
+    "Brand Name",
+    value=st.session_state.get("lead_brand_name", ""),
+    placeholder="Your brand name",
+    key="sales_audit_brand_name",
+)
 
-c1, c2 = st.columns(2)
-c3, c4 = st.columns(2)
-c5, c6 = st.columns(2)
-with c1:
-    bulk_file = st.file_uploader("Bulk Sheet", type=["xlsx", "xls", "csv"], key="bulk_file")
-with c2:
-    impression_share_file = st.file_uploader("SP Impression Share Report", type=["xlsx", "xls", "csv"], key="impression_share_file")
-with c3:
-    targeting_file = st.file_uploader("SP Targeting Report", type=["xlsx", "xls", "csv"], key="targeting_file")
-with c4:
-    search_term_file = st.file_uploader("SP Search Term Report", type=["xlsx", "xls", "csv"], key="search_term_file")
-with c5:
-    business_report_file = st.file_uploader("Sales & Traffic Business Report", type=["xlsx", "xls", "csv"], key="business_report_file")
-with c6:
-    sb_campaign_file = st.file_uploader("Sponsored Brands Campaign Report (optional)", type=["xlsx", "xls", "csv"], key="sb_campaign_file")
+u1, u2 = st.columns(2)
+u3, u4 = st.columns(2)
+u5, u6 = st.columns(2)
+
+with u1:
+    bulk_file = st.file_uploader("Bulk Sheet", type=["xlsx", "xls", "csv"], key="sales_audit_bulk_file")
+with u2:
+    impression_share_file = st.file_uploader("SP Impression Share Report", type=["csv", "xlsx", "xls"], key="sales_audit_impression_share_file")
+with u3:
+    targeting_file = st.file_uploader("SP Targeting Report", type=["csv", "xlsx", "xls"], key="sales_audit_targeting_file")
+with u4:
+    search_term_file = st.file_uploader("SP Search Term Report", type=["csv", "xlsx", "xls"], key="sales_audit_search_term_file")
+with u5:
+    business_report_file = st.file_uploader("Sales & Traffic Business Report", type=["csv", "xlsx", "xls"], key="sales_audit_business_report_file")
+with u6:
+    sb_campaign_file = st.file_uploader("Sponsored Brands Campaign Report (optional)", type=["csv", "xlsx", "xls"], key="sales_audit_sb_campaign_file")
 
 required_ready = all([
-    brand_name.strip(),
+    brand_name_input.strip(),
     bulk_file is not None,
     impression_share_file is not None,
     targeting_file is not None,
@@ -313,13 +530,29 @@ required_ready = all([
     business_report_file is not None,
 ])
 
-st.caption("Ready to run" if required_ready else "Please add your brand name and all 5 required reports.")
+st.markdown(
+    f'<div class="upload-note">Status: {"Ready to run" if required_ready else "Please add your brand name and all 5 required reports."}</div>',
+    unsafe_allow_html=True,
+)
 
-if st.button("Audit My Account", type="primary", use_container_width=True, disabled=not required_ready):
-    st.session_state.pop("sales_audit_error", None)
-    st.session_state["sales_audit_unlocked"] = False
-    st.session_state["sales_audit_created_report"] = None
-    with st.spinner("Running your audit..."):
+run_clicked = st.button(
+    "Audit My Account",
+    type="primary",
+    use_container_width=True,
+    disabled=not required_ready,
+)
+
+
+# =========================================================
+# PROCESS AUDIT
+# =========================================================
+if run_clicked:
+    st.session_state["sales_audit_results"] = {}
+    st.session_state["created_report"] = None
+    st.session_state["unlock_complete"] = False
+    st.session_state["lead_brand_name"] = brand_name_input.strip()
+
+    with st.spinner("Running sales audit..."):
         try:
             engine = SalesAuditEngine(
                 bulk_file=bulk_file,
@@ -333,140 +566,226 @@ if st.button("Audit My Account", type="primary", use_container_width=True, disab
                 min_waste_spend=0.01,
                 min_winner_orders=1,
             )
-            engine.brand_name = brand_name.strip()
+            engine.brand_name = brand_name_input.strip()
+
             results = engine.process()
-            results["brand_name"] = brand_name.strip()
-            results["has_sb_report"] = sb_campaign_file is not None
+            results["brand_name"] = brand_name_input.strip()
             st.session_state["sales_audit_results"] = results
         except Exception as exc:
-            st.session_state["sales_audit_error"] = f"We hit an issue while processing your files: {exc}"
+            st.error(f"Sales audit failed: {exc}")
 
 results = safe_dict(st.session_state.get("sales_audit_results", {}))
-error_message = st.session_state.get("sales_audit_error")
-if error_message:
-    st.error(error_message)
+brand_name = str(results.get("brand_name", st.session_state.get("lead_brand_name", ""))).strip()
 
-if results and not st.session_state.get("sales_audit_unlocked", False):
-    st.markdown('<div class="section-title">Unlock Your Branded Audit</div>', unsafe_allow_html=True)
-    st.markdown('<div class="section-note">Submit your details and we will generate your branded Google Sheets audit.</div>', unsafe_allow_html=True)
-
-    with st.form("unlock_audit_form"):
-        l1, l2 = st.columns(2)
-        with l1:
-            lead_name = st.text_input("Full Name", value="", key="lead_name")
-            lead_email = st.text_input("Work Email", value="", key="lead_email")
-        with l2:
-            lead_phone = st.text_input("Phone Number", value="", key="lead_phone")
-            lead_brand = st.text_input("Brand Name", value=results.get("brand_name", ""), key="lead_brand")
-        submitted = st.form_submit_button("Unlock My Audit", type="primary", use_container_width=True)
-
-    if submitted:
-        if not all([lead_name.strip(), lead_email.strip(), lead_phone.strip(), lead_brand.strip()]):
-            st.error("Please complete all four fields before unlocking your audit.")
-        else:
-            with st.spinner("Generating your branded audit..."):
-                try:
-                    kpis = safe_dict(results.get("kpi_summary"))
-                    waste_summary = safe_dict(results.get("waste_summary"))
-                    keyword_spend_table = safe_df(results.get("keyword_spend_table"))
-                    search_term_spend_table = safe_df(results.get("search_term_spend_table"))
-                    waste_tables = safe_dict(results.get("waste_tables"))
-                    winner_tables = safe_dict(results.get("winner_tables"))
-                    campaign_summary = safe_df(results.get("campaign_summary"))
-
-                    kw_zero = safe_df(waste_tables.get("keyword_zero_sale"))
-                    kw_high = safe_df(waste_tables.get("keyword_high_acos"))
-                    st_zero = safe_df(waste_tables.get("search_zero_sale"))
-                    st_high = safe_df(waste_tables.get("search_high_acos"))
-                    kw_winners_raw = safe_df(winner_tables.get("keyword_winners"))
-                    st_winners_raw = safe_df(winner_tables.get("search_winners"))
-
-                    waste_kw_raw = pd.concat([kw_zero, kw_high], ignore_index=True).drop_duplicates() if (not kw_zero.empty or not kw_high.empty) else pd.DataFrame()
-                    waste_st_raw = pd.concat([st_zero, st_high], ignore_index=True).drop_duplicates() if (not st_zero.empty or not st_high.empty) else pd.DataFrame()
-
-                    report_name = f"{lead_brand.strip()} - Amazon Ads Audit"
-                    date_range_label = (results.get("date_range_label") or "").strip() or "MM/DD - MM/DD"
-
-                    created_report = create_google_sheet_report(
-                        brand_name=lead_brand.strip(),
-                        report_name=report_name,
-                        date_range_label=date_range_label,
-                        kpi_summary=kpis,
-                        waste_summary=waste_summary,
-                        match_type_revenue_rows=results.get("match_type_revenue_rows", []),
-                        match_type_inefficient_rows=results.get("match_type_inefficient_rows", []),
-                        campaign_rows=normalize_records_for_sheet(campaign_summary),
-                        campaign_type_rows=results.get("campaign_type_rows", []),
-                        top_keyword_rows=simplify_raw_for_sheet(keyword_spend_table, "target", limit=20),
-                        top_search_term_rows=simplify_raw_for_sheet(search_term_spend_table, "customer_search_term", limit=20),
-                        waste_keyword_rows=simplify_raw_for_sheet(waste_kw_raw, "target", limit=50),
-                        waste_search_term_rows=simplify_raw_for_sheet(waste_st_raw, "customer_search_term", limit=50),
-                        winner_keyword_rows=simplify_raw_for_sheet(kw_winners_raw, "target", limit=50),
-                        winner_search_term_rows=simplify_raw_for_sheet(st_winners_raw, "customer_search_term", limit=50),
-                        targeting_data_rows=normalize_records_for_sheet(safe_df(results.get("targeting_with_share"))),
-                        search_term_data_rows=normalize_records_for_sheet(safe_df(results.get("search_terms"))),
-                    )
-
-                    send_lead_webhook(
-                        {
-                            "name": lead_name.strip(),
-                            "email": lead_email.strip(),
-                            "phone": lead_phone.strip(),
-                            "brand_name": lead_brand.strip(),
-                            "audit_url": created_report.get("url", ""),
-                            "report_name": report_name,
-                            "date_range_label": date_range_label,
-                            "source": "sales_audit_tool",
-                        }
-                    )
-
-                    st.session_state["sales_audit_created_report"] = created_report
-                    st.session_state["sales_audit_unlocked"] = True
-                    st.rerun()
-                except Exception as exc:
-                    st.error(f"We hit an issue while creating the audit: {exc}")
-
-if results and st.session_state.get("sales_audit_unlocked", False):
-    created_report = safe_dict(st.session_state.get("sales_audit_created_report", {}))
+if results:
     kpis = safe_dict(results.get("kpi_summary"))
+    waste_summary = safe_dict(results.get("waste_summary"))
+    health_summary = safe_dict(results.get("health_summary"))
+    campaign_summary = safe_df(results.get("campaign_summary"))
     keyword_spend_table = safe_df(results.get("keyword_spend_table"))
+    search_term_spend_table = safe_df(results.get("search_term_spend_table"))
     waste_tables = safe_dict(results.get("waste_tables"))
+    winner_tables = safe_dict(results.get("winner_tables"))
+    narrative = str(results.get("narrative", "")).strip()
 
-    waste_kw_raw = pd.concat(
-        [safe_df(waste_tables.get("keyword_zero_sale")), safe_df(waste_tables.get("keyword_high_acos"))],
-        ignore_index=True,
-    ).drop_duplicates()
-    waste_st_raw = pd.concat(
-        [safe_df(waste_tables.get("search_zero_sale")), safe_df(waste_tables.get("search_high_acos"))],
-        ignore_index=True,
-    ).drop_duplicates()
-    biggest_waste = waste_st_raw if not waste_st_raw.empty else waste_kw_raw
-    waste_term_col = "customer_search_term" if not waste_st_raw.empty else "target"
+    # UI tables
+    kw_zero = simplify_term_table(safe_df(waste_tables.get("keyword_zero_sale")), "target")
+    kw_high = simplify_term_table(safe_df(waste_tables.get("keyword_high_acos")), "target")
+    st_zero = simplify_term_table(safe_df(waste_tables.get("search_zero_sale")), "customer_search_term")
+    st_high = simplify_term_table(safe_df(waste_tables.get("search_high_acos")), "customer_search_term")
+    kw_winners = simplify_term_table(safe_df(winner_tables.get("keyword_winners")), "target").head(20)
+    st_winners = simplify_term_table(safe_df(winner_tables.get("search_winners")), "customer_search_term").head(20)
+    top_kw = simplify_term_table(keyword_spend_table, "target").head(20)
+    top_st = simplify_term_table(search_term_spend_table, "customer_search_term").head(20)
+    campaign_view = simplify_campaign_table(campaign_summary).head(20)
 
-    st.success("Your branded audit is ready.")
-    if created_report.get("url"):
-        st.markdown(f"[Open Google Sheet audit]({created_report['url']})")
+    # Raw sheet tables
+    top_kw_sheet = build_sheet_term_table(keyword_spend_table, "target").head(20)
+    top_st_sheet = build_sheet_term_table(search_term_spend_table, "customer_search_term").head(20)
 
-    m1, m2, m3 = st.columns(3)
-    with m1:
-        st.markdown(f'<div class="metric"><div class="metric-label">Spend</div><div class="metric-value">{format_currency(kpis.get("spend"))}</div></div>', unsafe_allow_html=True)
-    with m2:
-        st.markdown(f'<div class="metric"><div class="metric-label">Ad Sales</div><div class="metric-value">{format_currency(kpis.get("ad_sales"))}</div></div>', unsafe_allow_html=True)
-    with m3:
-        st.markdown(f'<div class="metric"><div class="metric-label">TACOS</div><div class="metric-value">{format_percent(kpis.get("tacos_pct"))}</div></div>', unsafe_allow_html=True)
+    waste_kw_sheet = build_sheet_term_table(
+        pd.concat(
+            [
+                safe_df(waste_tables.get("keyword_zero_sale")),
+                safe_df(waste_tables.get("keyword_high_acos")),
+            ],
+            ignore_index=True,
+        ).drop_duplicates(),
+        "target",
+    )
 
-    d1, d2 = st.columns(2)
-    with d1:
-        st.markdown("### Top Keywords")
-        top_kw = simplify_term_table(keyword_spend_table, "target", limit=10)
-        if not top_kw.empty:
-            st.dataframe(top_kw, use_container_width=True)
+    waste_st_sheet = build_sheet_term_table(
+        pd.concat(
+            [
+                safe_df(waste_tables.get("search_zero_sale")),
+                safe_df(waste_tables.get("search_high_acos")),
+            ],
+            ignore_index=True,
+        ).drop_duplicates(),
+        "customer_search_term",
+    )
+
+    kw_winners_sheet = build_sheet_term_table(
+        safe_df(winner_tables.get("keyword_winners")),
+        "target",
+    ).head(20)
+
+    st_winners_sheet = build_sheet_term_table(
+        safe_df(winner_tables.get("search_winners")),
+        "customer_search_term",
+    ).head(20)
+
+    waste_kw_combined = pd.concat([kw_zero, kw_high], ignore_index=True).drop_duplicates()
+    if not waste_kw_combined.empty and "spend" in waste_kw_combined.columns:
+        waste_kw_combined = waste_kw_combined[waste_kw_combined["spend"].map(_spend_to_float) >= 0.01].copy()
+    waste_kw_combined = waste_kw_combined.head(20)
+
+    waste_st_combined = pd.concat([st_zero, st_high], ignore_index=True).drop_duplicates()
+    if not waste_st_combined.empty and "spend" in waste_st_combined.columns:
+        waste_st_combined = waste_st_combined[waste_st_combined["spend"].map(_spend_to_float) >= 0.01].copy()
+    waste_st_combined = waste_st_combined.head(20)
+
+    if brand_name:
+        st.markdown(f"### {brand_name}")
+
+    st.markdown('<div class="section-title">Account Health Verdict</div>', unsafe_allow_html=True)
+    status = health_summary.get("status", "Unknown")
+    tone = tone_from_health(status)
+    st.markdown(f'<div class="status-pill {tone}">{status}</div>', unsafe_allow_html=True)
+    st.markdown(
+        f"""
+        <div class="summary-box">
+            <strong>Summary:</strong> {health_summary.get("summary", "No summary available.")}
+            <br><br>
+            <strong>Narrative:</strong> {narrative}
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    st.markdown('<div class="section-title">Executive KPI Snapshot</div>', unsafe_allow_html=True)
+    r1 = st.columns(4)
+    with r1[0]:
+        render_metric_card("Spend", format_currency(kpis.get("spend")), tone="brand")
+    with r1[1]:
+        render_metric_card("Ad Sales", format_currency(kpis.get("ad_sales")), tone="brand")
+    with r1[2]:
+        render_metric_card("Total Sales", format_currency(kpis.get("total_sales")), tone="brand")
+    with r1[3]:
+        render_metric_card("Organic Sales", format_currency(kpis.get("organic_sales")), tone="brand")
+
+    r2 = st.columns(4)
+    with r2[0]:
+        render_metric_card("ACOS", format_percent(kpis.get("acos_pct")), tone="warn")
+    with r2[1]:
+        render_metric_card("ROAS", format_number(kpis.get("roas")), tone="good")
+    with r2[2]:
+        render_metric_card("TACOS", format_percent(kpis.get("tacos_pct")), tone="warn")
+    with r2[3]:
+        render_metric_card("Wasted Spend", format_currency(waste_summary.get("wasted_spend")), tone="bad")
+
+    # Unlock form only once
+    if not st.session_state["unlock_complete"]:
+        st.markdown("### Unlock Your Branded Audit")
+        st.markdown("Submit your details and we will generate your branded Google Sheets audit.")
+
+        with st.form("unlock_audit_form", clear_on_submit=False):
+            lead_col1, lead_col2 = st.columns(2)
+            with lead_col1:
+                lead_name = st.text_input("Full Name", value=st.session_state.get("lead_name", ""))
+                lead_email = st.text_input("Work Email", value=st.session_state.get("lead_email", ""))
+            with lead_col2:
+                lead_phone = st.text_input("Phone Number", value=st.session_state.get("lead_phone", ""))
+                lead_brand_name = st.text_input("Brand Name", value=brand_name or st.session_state.get("lead_brand_name", ""))
+
+            unlock_clicked = st.form_submit_button("Unlock My Audit", use_container_width=True)
+
+        if unlock_clicked:
+            st.session_state["lead_name"] = lead_name
+            st.session_state["lead_email"] = lead_email
+            st.session_state["lead_phone"] = lead_phone
+            st.session_state["lead_brand_name"] = lead_brand_name
+
+            try:
+                date_range_label = (results.get("date_range_label") or "").strip() or "MM/DD - MM/DD"
+
+                created_report = create_google_sheet_report(
+                    brand_name=lead_brand_name,
+                    report_name=f"{lead_brand_name} - Amazon Ads Audit",
+                    date_range_label=date_range_label,
+                    kpi_summary=kpis,
+                    waste_summary=waste_summary,
+                    match_type_revenue_rows=results.get("match_type_revenue_rows", []),
+                    match_type_inefficient_rows=results.get("match_type_inefficient_rows", []),
+                    campaign_rows=normalize_records_for_sheet(campaign_summary),
+                    campaign_type_rows=results.get("campaign_type_rows", []),
+                    top_keyword_rows=normalize_records_for_sheet(top_kw_sheet),
+                    top_search_term_rows=normalize_records_for_sheet(top_st_sheet),
+                    waste_keyword_rows=normalize_records_for_sheet(waste_kw_sheet),
+                    waste_search_term_rows=normalize_records_for_sheet(waste_st_sheet),
+                    winner_keyword_rows=normalize_records_for_sheet(kw_winners_sheet),
+                    winner_search_term_rows=normalize_records_for_sheet(st_winners_sheet),
+                    targeting_data_rows=normalize_records_for_sheet(safe_df(results.get("targeting_with_share"))),
+                    search_term_data_rows=normalize_records_for_sheet(safe_df(results.get("search_terms"))),
+                )
+
+                st.session_state["created_report"] = created_report
+                st.session_state["unlock_complete"] = True
+                st.rerun()
+
+            except Exception as exc:
+                st.error(f"We hit an issue while creating the audit: {exc}")
+
+    if st.session_state["unlock_complete"] and st.session_state["created_report"]:
+        created_report = st.session_state["created_report"]
+        st.success("Your branded audit is ready.")
+        st.markdown(f"[Open Google Sheet]({created_report['url']})")
+
+        st.markdown("### Quick Overview")
+        overview_left, overview_right = st.columns(2)
+
+        with overview_left:
+            st.markdown("**Top Keywords / Targets**")
+            top_kw_brief = top_kw.head(5).copy()
+            if not top_kw_brief.empty:
+                st.dataframe(top_kw_brief, use_container_width=True, hide_index=True)
+            else:
+                st.info("No top keyword data available.")
+
+        with overview_right:
+            st.markdown("**Biggest Waste**")
+            waste_brief = pd.concat([waste_kw_sheet, waste_st_sheet], ignore_index=True).drop_duplicates()
+            if not waste_brief.empty:
+                waste_brief = waste_brief.sort_values("spend", ascending=False).head(5)
+                st.dataframe(waste_brief, use_container_width=True, hide_index=True)
+            else:
+                st.info("No major waste terms found.")
+
+    with st.expander("Campaign Summary", expanded=False):
+        if not campaign_view.empty:
+            st.dataframe(campaign_view, use_container_width=True, hide_index=True)
         else:
-            st.info("No keyword data available.")
-    with d2:
-        st.markdown("### Biggest Waste")
-        waste_view = simplify_term_table(biggest_waste, waste_term_col, limit=10)
-        if not waste_view.empty:
-            st.dataframe(waste_view, use_container_width=True)
-        else:
-            st.info("No major waste terms found.")
+            st.info("No campaign summary available.")
+
+    export_sheets = {
+        "KPI Summary": pd.DataFrame([kpis]),
+        "Waste Summary": pd.DataFrame([waste_summary]),
+        "Campaign Summary": campaign_view,
+        "Keyword Spend": top_kw_sheet,
+        "Search Term Spend": top_st_sheet,
+        "KW Waste": waste_kw_sheet,
+        "ST Waste": waste_st_sheet,
+        "KW Winners": kw_winners_sheet,
+        "ST Winners": st_winners_sheet,
+    }
+
+    export_bytes = to_excel_bytes_multi(export_sheets)
+    st.download_button(
+        label="Download Sales Audit Workbook",
+        data=export_bytes,
+        file_name=f"{brand_name or 'sales_audit'}_audit_workbook.xlsx".replace(" ", "_"),
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        use_container_width=True,
+    )
+else:
+    st.info("Upload your reports and click Audit My Account to begin.")
