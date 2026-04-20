@@ -272,9 +272,20 @@ def create_google_sheet_report(
     targeting_data_rows: list[dict],
     search_term_data_rows: list[dict],
 ) -> dict:
-    webhook_url = st.secrets["GOOGLE_SHEET_WEBHOOK_URL"]
-    template_id = st.secrets["GOOGLE_SHEETS_TEMPLATE_ID"]
-    destination_folder_id = st.secrets["GOOGLE_DRIVE_FOLDER_ID"]
+    webhook_url = os.getenv("GOOGLE_SHEET_WEBHOOK_URL")
+    template_id = os.getenv("GOOGLE_SHEETS_TEMPLATE_ID")
+    destination_folder_id = os.getenv("GOOGLE_DRIVE_FOLDER_ID")
+
+    missing = []
+    if not webhook_url:
+        missing.append("GOOGLE_SHEET_WEBHOOK_URL")
+    if not template_id:
+        missing.append("GOOGLE_SHEETS_TEMPLATE_ID")
+    if not destination_folder_id:
+        missing.append("GOOGLE_DRIVE_FOLDER_ID")
+
+    if missing:
+        raise RuntimeError(f"Missing environment variables: {', '.join(missing)}")
 
     payload = {
         "templateId": template_id,
