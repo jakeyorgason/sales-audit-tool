@@ -1,4 +1,3 @@
-
 import os
 from typing import Any, Optional
 
@@ -16,7 +15,6 @@ st.set_page_config(
     layout="wide",
 )
 
-
 # =========================================================
 # SESSION STATE
 # =========================================================
@@ -29,6 +27,7 @@ DEFAULT_STATE = {
     "lead_phone": "",
     "lead_brand_name": "",
 }
+
 for _k, _v in DEFAULT_STATE.items():
     if _k not in st.session_state:
         st.session_state[_k] = _v
@@ -80,16 +79,6 @@ def format_percent(value: float) -> str:
 
 def format_number(value: float) -> str:
     return f"{get_number(value):,.2f}"
-
-
-def _spend_to_float(v: Any) -> float:
-    if v is None:
-        return 0.0
-    text = str(v).replace("$", "").replace(",", "").strip()
-    try:
-        return float(text)
-    except ValueError:
-        return 0.0
 
 
 def render_metric_card(label: str, value: str, tone: str = "brand", small: bool = False) -> None:
@@ -144,7 +133,32 @@ def simplify_term_table(df: pd.DataFrame, term_col: str) -> pd.DataFrame:
     return out.reset_index(drop=True)
 
 
+def simplify_campaign_table(df: pd.DataFrame) -> pd.DataFrame:
+    if df is None or df.empty:
+        return pd.DataFrame()
+
+    out = df.copy()
+    keep = [c for c in ["campaign_name", "spend", "sales", "acos_pct", "campaign_status"] if c in out.columns]
+    out = out[keep].copy()
+
+    if "spend" in out.columns:
+        out["spend"] = pd.to_numeric(out["spend"], errors="coerce").fillna(0).round(2)
+    if "sales" in out.columns:
+        out["sales"] = pd.to_numeric(out["sales"], errors="coerce").fillna(0).round(2)
+    if "acos_pct" in out.columns:
+        out["acos_pct"] = pd.to_numeric(out["acos_pct"], errors="coerce").fillna(0).round(2)
+
+    return out.sort_values(["spend", "sales"], ascending=[False, False]).reset_index(drop=True)
+
+
 def build_sheet_term_table(df: pd.DataFrame, term_col: str) -> pd.DataFrame:
+    """
+    Build raw numeric rows for the Google Sheet payload.
+
+    NOTE:
+    For this audit workflow, the term-level spend/sales tables are arriving in cents,
+    while the KPI summary is already in dollars. We normalize to dollars here.
+    """
     if df is None or df.empty:
         return pd.DataFrame()
 
@@ -167,32 +181,11 @@ def build_sheet_term_table(df: pd.DataFrame, term_col: str) -> pd.DataFrame:
     out["sales"] = pd.to_numeric(out["sales"], errors="coerce").fillna(0)
     out["acos"] = pd.to_numeric(out["acos"], errors="coerce").fillna(0)
 
-    # IMPORTANT:
-    # These term-level source tables are coming through in cents,
-    # while KPI summary values are already in dollars.
     out["spend"] = (out["spend"] / 100.0).round(2)
     out["sales"] = (out["sales"] / 100.0).round(2)
     out["acos"] = out["acos"].round(2)
 
     return out.reset_index(drop=True)
-
-
-def simplify_campaign_table(df: pd.DataFrame) -> pd.DataFrame:
-    if df is None or df.empty:
-        return pd.DataFrame()
-
-    out = df.copy()
-    keep = [c for c in ["campaign_name", "spend", "sales", "acos_pct", "campaign_status"] if c in out.columns]
-    out = out[keep].copy()
-
-    if "spend" in out.columns:
-        out["spend"] = pd.to_numeric(out["spend"], errors="coerce").fillna(0).round(2)
-    if "sales" in out.columns:
-        out["sales"] = pd.to_numeric(out["sales"], errors="coerce").fillna(0).round(2)
-    if "acos_pct" in out.columns:
-        out["acos_pct"] = pd.to_numeric(out["acos_pct"], errors="coerce").fillna(0).round(2)
-
-    return out.sort_values(["spend", "sales"], ascending=[False, False]).reset_index(drop=True)
 
 
 def normalize_records_for_sheet(df: pd.DataFrame) -> list[dict]:
@@ -225,7 +218,6 @@ def normalize_records_for_sheet(df: pd.DataFrame) -> list[dict]:
 
     for col in out.columns:
         col_l = str(col).lower().strip()
-
         out[col] = out[col].map(parse_numeric_like)
 
         if col_l in {"ctr", "cvr", "acos", "acos_pct"}:
@@ -234,26 +226,20 @@ def normalize_records_for_sheet(df: pd.DataFrame) -> list[dict]:
                 .fillna(0)
                 .map(lambda x: round(float(x) / 100.0, 6))
             )
-
         elif col_l in {"roas"}:
             out[col] = pd.to_numeric(out[col], errors="coerce").fillna(0).map(lambda x: round(float(x), 2))
-
         elif col_l in {"cpc"}:
             out[col] = pd.to_numeric(out[col], errors="coerce").fillna(0).map(lambda x: round(float(x), 2))
-
         elif col_l in {"spend", "sales", "ad_sales", "total_sales", "organic_sales", "ntb_sales"}:
             out[col] = pd.to_numeric(out[col], errors="coerce").fillna(0).map(lambda x: round(float(x), 2))
-
         elif col_l in {"impressions", "clicks", "orders", "units_ordered", "sessions", "ntb_orders"}:
             out[col] = pd.to_numeric(out[col], errors="coerce").fillna(0).map(lambda x: int(round(float(x))))
-
         elif "pct" in col_l or "percent" in col_l:
             out[col] = (
                 pd.to_numeric(out[col], errors="coerce")
                 .fillna(0)
                 .map(lambda x: round(float(x) / 100.0, 6))
             )
-
         elif pd.api.types.is_numeric_dtype(out[col]):
             out[col] = pd.to_numeric(out[col], errors="coerce").fillna(0)
 
@@ -470,8 +456,6 @@ with st.sidebar:
 """
     )
     if st.button("Start over", use_container_width=True):
-        for k, v in DEFAULT_STATE.items():
-            st.session_state[k] = {} if isinstance(v, dict) else (None if v is None else v.__class__() if isinstance(v, (str, list)) else v)
         st.session_state["sales_audit_results"] = {}
         st.session_state["created_report"] = None
         st.session_state["unlock_complete"] = False
@@ -607,10 +591,6 @@ if results:
     narrative = str(results.get("narrative", "")).strip()
 
     # UI tables
-    kw_zero = simplify_term_table(safe_df(waste_tables.get("keyword_zero_sale")), "target")
-    kw_high = simplify_term_table(safe_df(waste_tables.get("keyword_high_acos")), "target")
-    st_zero = simplify_term_table(safe_df(waste_tables.get("search_zero_sale")), "customer_search_term")
-    st_high = simplify_term_table(safe_df(waste_tables.get("search_high_acos")), "customer_search_term")
     kw_winners = simplify_term_table(safe_df(winner_tables.get("keyword_winners")), "target").head(20)
     st_winners = simplify_term_table(safe_df(winner_tables.get("search_winners")), "customer_search_term").head(20)
     top_kw = simplify_term_table(keyword_spend_table, "target").head(20)
@@ -653,105 +633,91 @@ if results:
         "customer_search_term",
     ).head(20)
 
-    waste_kw_combined = pd.concat([kw_zero, kw_high], ignore_index=True).drop_duplicates()
-    if not waste_kw_combined.empty and "spend" in waste_kw_combined.columns:
-        waste_kw_combined = waste_kw_combined[waste_kw_combined["spend"].map(_spend_to_float) >= 0.01].copy()
-    waste_kw_combined = waste_kw_combined.head(20)
+    # TOP CONTENT
+    top_content_left, top_content_right = st.columns([3.2, 1.35], gap="large")
 
-    waste_st_combined = pd.concat([st_zero, st_high], ignore_index=True).drop_duplicates()
-    if not waste_st_combined.empty and "spend" in waste_st_combined.columns:
-        waste_st_combined = waste_st_combined[waste_st_combined["spend"].map(_spend_to_float) >= 0.01].copy()
-    waste_st_combined = waste_st_combined.head(20)
+    with top_content_left:
+        if brand_name:
+            st.markdown(f"### {brand_name}")
 
-    if brand_name:
-        st.markdown(f"### {brand_name}")
+        st.markdown('<div class="section-title">Account Health Verdict</div>', unsafe_allow_html=True)
+        status = health_summary.get("status", "Unknown")
+        tone = tone_from_health(status)
+        st.markdown(f'<div class="status-pill {tone}">{status}</div>', unsafe_allow_html=True)
+        st.markdown(
+            f"""
+            <div class="summary-box">
+                <strong>Summary:</strong> {health_summary.get("summary", "No summary available.")}
+                <br><br>
+                <strong>Narrative:</strong> {narrative}
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
-    st.markdown('<div class="section-title">Account Health Verdict</div>', unsafe_allow_html=True)
-    status = health_summary.get("status", "Unknown")
-    tone = tone_from_health(status)
-    st.markdown(f'<div class="status-pill {tone}">{status}</div>', unsafe_allow_html=True)
-    st.markdown(
-        f"""
-        <div class="summary-box">
-            <strong>Summary:</strong> {health_summary.get("summary", "No summary available.")}
-            <br><br>
-            <strong>Narrative:</strong> {narrative}
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+        st.markdown('<div class="section-title">Executive KPI Snapshot</div>', unsafe_allow_html=True)
+        r1 = st.columns(4)
+        with r1[0]:
+            render_metric_card("Spend", format_currency(kpis.get("spend")), tone="brand")
+        with r1[1]:
+            render_metric_card("Ad Sales", format_currency(kpis.get("ad_sales")), tone="brand")
+        with r1[2]:
+            render_metric_card("Total Sales", format_currency(kpis.get("total_sales")), tone="brand")
+        with r1[3]:
+            render_metric_card("Organic Sales", format_currency(kpis.get("organic_sales")), tone="brand")
 
-    st.markdown('<div class="section-title">Executive KPI Snapshot</div>', unsafe_allow_html=True)
-    r1 = st.columns(4)
-    with r1[0]:
-        render_metric_card("Spend", format_currency(kpis.get("spend")), tone="brand")
-    with r1[1]:
-        render_metric_card("Ad Sales", format_currency(kpis.get("ad_sales")), tone="brand")
-    with r1[2]:
-        render_metric_card("Total Sales", format_currency(kpis.get("total_sales")), tone="brand")
-    with r1[3]:
-        render_metric_card("Organic Sales", format_currency(kpis.get("organic_sales")), tone="brand")
+        r2 = st.columns(4)
+        with r2[0]:
+            render_metric_card("ACOS", format_percent(kpis.get("acos_pct")), tone="warn")
+        with r2[1]:
+            render_metric_card("ROAS", format_number(kpis.get("roas")), tone="good")
+        with r2[2]:
+            render_metric_card("TACOS", format_percent(kpis.get("tacos_pct")), tone="warn")
+        with r2[3]:
+            render_metric_card("Wasted Spend", format_currency(waste_summary.get("wasted_spend")), tone="bad")
 
-    r2 = st.columns(4)
-    with r2[0]:
-        render_metric_card("ACOS", format_percent(kpis.get("acos_pct")), tone="warn")
-    with r2[1]:
-        render_metric_card("ROAS", format_number(kpis.get("roas")), tone="good")
-    with r2[2]:
-        render_metric_card("TACOS", format_percent(kpis.get("tacos_pct")), tone="warn")
-    with r2[3]:
-        render_metric_card("Wasted Spend", format_currency(waste_summary.get("wasted_spend")), tone="bad")
-
-    # Unlock form only once
+    with top_content_right:
+        st.markdown("---")
         if not st.session_state["unlock_complete"]:
-            st.markdown("---")
             st.markdown("### Unlock Your Branded Audit")
             st.markdown("Submit your details and we will generate your branded Google Sheets audit.")
-        
-            unlock_shell_left, unlock_shell_center, unlock_shell_right = st.columns([1, 2.2, 1])
-        
-            with unlock_shell_center:
-                lead_col1, lead_col2 = st.columns(2)
-        
-                with lead_col1:
-                    lead_name = st.text_input(
-                        "Full Name",
-                        value=st.session_state.get("lead_name", ""),
-                        key="unlock_name",
-                    )
-                    lead_email = st.text_input(
-                        "Work Email",
-                        value=st.session_state.get("lead_email", ""),
-                        key="unlock_email",
-                    )
-        
-                with lead_col2:
-                    lead_phone = st.text_input(
-                        "Phone Number",
-                        value=st.session_state.get("lead_phone", ""),
-                        key="unlock_phone",
-                    )
-                    lead_brand_name = st.text_input(
-                        "Brand Name",
-                        value=brand_name or st.session_state.get("lead_brand_name", ""),
-                        key="unlock_brand",
-                    )
-        
-                unlock_clicked = st.button(
-                    "Unlock My Audit",
-                    use_container_width=True,
-                    key="unlock_button",
-                )
-    
+
+            lead_name = st.text_input(
+                "Full Name",
+                value=st.session_state.get("lead_name", ""),
+                key="unlock_name",
+            )
+            lead_phone = st.text_input(
+                "Phone Number",
+                value=st.session_state.get("lead_phone", ""),
+                key="unlock_phone",
+            )
+            lead_email = st.text_input(
+                "Work Email",
+                value=st.session_state.get("lead_email", ""),
+                key="unlock_email",
+            )
+            lead_brand_name = st.text_input(
+                "Brand Name",
+                value=brand_name or st.session_state.get("lead_brand_name", ""),
+                key="unlock_brand",
+            )
+
+            unlock_clicked = st.button(
+                "Unlock My Audit",
+                use_container_width=True,
+                key="unlock_button",
+            )
+
             if unlock_clicked:
                 st.session_state["lead_name"] = lead_name
                 st.session_state["lead_email"] = lead_email
                 st.session_state["lead_phone"] = lead_phone
                 st.session_state["lead_brand_name"] = lead_brand_name
-    
+
                 try:
                     date_range_label = (results.get("date_range_label") or "").strip() or "MM/DD - MM/DD"
-    
+
                     with st.spinner("Generating your branded audit..."):
                         created_report = create_google_sheet_report(
                             brand_name=lead_brand_name,
@@ -772,38 +738,39 @@ if results:
                             targeting_data_rows=normalize_records_for_sheet(safe_df(results.get("targeting_with_share"))),
                             search_term_data_rows=normalize_records_for_sheet(safe_df(results.get("search_terms"))),
                         )
-    
+
                     st.session_state["created_report"] = created_report
                     st.session_state["unlock_complete"] = True
                     st.rerun()
-    
+
                 except Exception as exc:
                     st.error(f"We hit an issue while creating the audit: {exc}")
 
-    if st.session_state["unlock_complete"] and st.session_state["created_report"]:
-        created_report = st.session_state["created_report"]
-        st.success("Your branded audit is ready.")
-        st.markdown(f"[Open Google Sheet]({created_report['url']})")
+        if st.session_state["unlock_complete"] and st.session_state["created_report"]:
+            created_report = st.session_state["created_report"]
+            st.success("Your branded audit is ready.")
+            st.markdown(f"[Open Google Sheet]({created_report['url']})")
 
-        st.markdown("### Quick Overview")
-        overview_left, overview_right = st.columns(2)
+    st.markdown("---")
+    st.markdown("### Quick Overview")
+    overview_left, overview_right = st.columns(2)
 
-        with overview_left:
-            st.markdown("**Top Keywords / Targets**")
-            top_kw_brief = top_kw.head(5).copy()
-            if not top_kw_brief.empty:
-                st.dataframe(top_kw_brief, use_container_width=True, hide_index=True)
-            else:
-                st.info("No top keyword data available.")
+    with overview_left:
+        st.markdown("**Top Keywords / Targets**")
+        top_kw_brief = top_kw.head(5).copy()
+        if not top_kw_brief.empty:
+            st.dataframe(top_kw_brief, use_container_width=True, hide_index=True)
+        else:
+            st.info("No top keyword data available.")
 
-        with overview_right:
-            st.markdown("**Biggest Waste**")
-            waste_brief = pd.concat([waste_kw_sheet, waste_st_sheet], ignore_index=True).drop_duplicates()
-            if not waste_brief.empty:
-                waste_brief = waste_brief.sort_values("spend", ascending=False).head(5)
-                st.dataframe(waste_brief, use_container_width=True, hide_index=True)
-            else:
-                st.info("No major waste terms found.")
+    with overview_right:
+        st.markdown("**Biggest Waste**")
+        waste_brief = pd.concat([waste_kw_sheet, waste_st_sheet], ignore_index=True).drop_duplicates()
+        if not waste_brief.empty:
+            waste_brief = waste_brief.sort_values("spend", ascending=False).head(5)
+            st.dataframe(waste_brief, use_container_width=True, hide_index=True)
+        else:
+            st.info("No major waste terms found.")
 
     with st.expander("Campaign Summary", expanded=False):
         if not campaign_view.empty:
