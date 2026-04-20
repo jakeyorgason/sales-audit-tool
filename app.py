@@ -163,9 +163,16 @@ def build_sheet_term_table(df: pd.DataFrame, term_col: str) -> pd.DataFrame:
         "acos_pct": "acos",
     })
 
-    out["spend"] = pd.to_numeric(out["spend"], errors="coerce").fillna(0).round(2)
-    out["sales"] = pd.to_numeric(out["sales"], errors="coerce").fillna(0).round(2)
-    out["acos"] = pd.to_numeric(out["acos"], errors="coerce").fillna(0).round(2)
+    out["spend"] = pd.to_numeric(out["spend"], errors="coerce").fillna(0)
+    out["sales"] = pd.to_numeric(out["sales"], errors="coerce").fillna(0)
+    out["acos"] = pd.to_numeric(out["acos"], errors="coerce").fillna(0)
+
+    # IMPORTANT:
+    # These term-level source tables are coming through in cents,
+    # while KPI summary values are already in dollars.
+    out["spend"] = (out["spend"] / 100.0).round(2)
+    out["sales"] = (out["sales"] / 100.0).round(2)
+    out["acos"] = out["acos"].round(2)
 
     return out.reset_index(drop=True)
 
@@ -696,20 +703,35 @@ if results:
         render_metric_card("Wasted Spend", format_currency(waste_summary.get("wasted_spend")), tone="bad")
 
     # Unlock form only once
-    if not st.session_state["unlock_complete"]:
+        if not st.session_state["unlock_complete"]:
         st.markdown("### Unlock Your Branded Audit")
         st.markdown("Submit your details and we will generate your branded Google Sheets audit.")
 
-        with st.form("unlock_audit_form", clear_on_submit=False):
-            lead_col1, lead_col2 = st.columns(2)
-            with lead_col1:
-                lead_name = st.text_input("Full Name", value=st.session_state.get("lead_name", ""))
-                lead_email = st.text_input("Work Email", value=st.session_state.get("lead_email", ""))
-            with lead_col2:
-                lead_phone = st.text_input("Phone Number", value=st.session_state.get("lead_phone", ""))
-                lead_brand_name = st.text_input("Brand Name", value=brand_name or st.session_state.get("lead_brand_name", ""))
+        lead_col1, lead_col2 = st.columns(2)
+        with lead_col1:
+            lead_name = st.text_input(
+                "Full Name",
+                value=st.session_state.get("lead_name", ""),
+                key="unlock_name",
+            )
+            lead_email = st.text_input(
+                "Work Email",
+                value=st.session_state.get("lead_email", ""),
+                key="unlock_email",
+            )
+        with lead_col2:
+            lead_phone = st.text_input(
+                "Phone Number",
+                value=st.session_state.get("lead_phone", ""),
+                key="unlock_phone",
+            )
+            lead_brand_name = st.text_input(
+                "Brand Name",
+                value=brand_name or st.session_state.get("lead_brand_name", ""),
+                key="unlock_brand",
+            )
 
-            unlock_clicked = st.form_submit_button("Unlock My Audit", use_container_width=True)
+        unlock_clicked = st.button("Unlock My Audit", use_container_width=True, key="unlock_button")
 
         if unlock_clicked:
             st.session_state["lead_name"] = lead_name
@@ -720,25 +742,26 @@ if results:
             try:
                 date_range_label = (results.get("date_range_label") or "").strip() or "MM/DD - MM/DD"
 
-                created_report = create_google_sheet_report(
-                    brand_name=lead_brand_name,
-                    report_name=f"{lead_brand_name} - Amazon Ads Audit",
-                    date_range_label=date_range_label,
-                    kpi_summary=kpis,
-                    waste_summary=waste_summary,
-                    match_type_revenue_rows=results.get("match_type_revenue_rows", []),
-                    match_type_inefficient_rows=results.get("match_type_inefficient_rows", []),
-                    campaign_rows=normalize_records_for_sheet(campaign_summary),
-                    campaign_type_rows=results.get("campaign_type_rows", []),
-                    top_keyword_rows=normalize_records_for_sheet(top_kw_sheet),
-                    top_search_term_rows=normalize_records_for_sheet(top_st_sheet),
-                    waste_keyword_rows=normalize_records_for_sheet(waste_kw_sheet),
-                    waste_search_term_rows=normalize_records_for_sheet(waste_st_sheet),
-                    winner_keyword_rows=normalize_records_for_sheet(kw_winners_sheet),
-                    winner_search_term_rows=normalize_records_for_sheet(st_winners_sheet),
-                    targeting_data_rows=normalize_records_for_sheet(safe_df(results.get("targeting_with_share"))),
-                    search_term_data_rows=normalize_records_for_sheet(safe_df(results.get("search_terms"))),
-                )
+                with st.spinner("Generating your branded audit..."):
+                    created_report = create_google_sheet_report(
+                        brand_name=lead_brand_name,
+                        report_name=f"{lead_brand_name} - Amazon Ads Audit",
+                        date_range_label=date_range_label,
+                        kpi_summary=kpis,
+                        waste_summary=waste_summary,
+                        match_type_revenue_rows=results.get("match_type_revenue_rows", []),
+                        match_type_inefficient_rows=results.get("match_type_inefficient_rows", []),
+                        campaign_rows=normalize_records_for_sheet(campaign_summary),
+                        campaign_type_rows=results.get("campaign_type_rows", []),
+                        top_keyword_rows=normalize_records_for_sheet(top_kw_sheet),
+                        top_search_term_rows=normalize_records_for_sheet(top_st_sheet),
+                        waste_keyword_rows=normalize_records_for_sheet(waste_kw_sheet),
+                        waste_search_term_rows=normalize_records_for_sheet(waste_st_sheet),
+                        winner_keyword_rows=normalize_records_for_sheet(kw_winners_sheet),
+                        winner_search_term_rows=normalize_records_for_sheet(st_winners_sheet),
+                        targeting_data_rows=normalize_records_for_sheet(safe_df(results.get("targeting_with_share"))),
+                        search_term_data_rows=normalize_records_for_sheet(safe_df(results.get("search_terms"))),
+                    )
 
                 st.session_state["created_report"] = created_report
                 st.session_state["unlock_complete"] = True
