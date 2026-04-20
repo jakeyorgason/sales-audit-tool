@@ -272,7 +272,7 @@ def create_google_sheet_report(
     targeting_data_rows: list[dict],
     search_term_data_rows: list[dict],
 ) -> dict:
-    webhook_url = st.secrets["APPS_SCRIPT_WEBHOOK_URL"]
+    webhook_url = st.secrets["GOOGLE_SHEET_WEBHOOK_URL"]
     template_id = st.secrets["GOOGLE_SHEETS_TEMPLATE_ID"]
     destination_folder_id = st.secrets["GOOGLE_DRIVE_FOLDER_ID"]
 
