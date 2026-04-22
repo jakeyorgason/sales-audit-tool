@@ -481,7 +481,7 @@ with header_right:
         <div class="brand-shell">
             <div class="brand-title">Free Amazon Ads Audit</div>
             <div class="brand-subtitle">
-                Upload your recent account reports and get a branded audit that highlights wasted spend, top opportunities, and winning terms.
+                Upload your recent account reports and get a personalized audit that highlights wasted spend, top opportunities, and winning terms.
             </div>
         </div>
         ''',
@@ -671,8 +671,8 @@ if results:
 
     # CENTERED LEAD FORM
     st.markdown("---")
-    st.markdown("## Get Your Free Branded Audit Report")
-    st.markdown("Submit your details and we will generate your branded Google Sheets audit.")
+    st.markdown("## Get Your Free Personalized Audit Report")
+    st.markdown("Submit your details and we will generate your personalized Google Sheets audit.")
 
     if not st.session_state["unlock_complete"]:
         left_pad, center_col, right_pad = st.columns([1, 2, 1])
@@ -714,7 +714,7 @@ if results:
             try:
                 date_range_label = (results.get("date_range_label") or "").strip() or "MM/DD - MM/DD"
 
-                with st.spinner("Generating your branded audit..."):
+                with st.spinner("Generating your personalized audit..."):
                     created_report = create_google_sheet_report(
                         brand_name=lead_brand_name,
                         report_name=f"{lead_brand_name} - Amazon Ads Audit",
@@ -744,7 +744,7 @@ if results:
 
     if st.session_state["unlock_complete"] and st.session_state["created_report"]:
         created_report = st.session_state["created_report"]
-        st.success("Your branded audit is ready.")
+        st.success("Your personalized audit is ready.")
         st.markdown(f"[Open Google Sheet]({created_report['url']})")
 
     st.markdown("---")
