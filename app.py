@@ -1,5 +1,6 @@
 import os
 import base64
+import textwrap
 from typing import Any, Optional
 
 import pandas as pd
@@ -14,7 +15,7 @@ from sales_audit_ingestion import SalesAuditEngine
 # =========================================================
 st.set_page_config(
     page_title="Free Amazon Ads Audit | Evolved Commerce",
-    page_icon="assets/ec_logo2.jpg",
+    page_icon="assets/ec_logo.png",
     layout="wide",
 )
 
@@ -608,15 +609,6 @@ st.markdown(
             color: var(--ec-orange);
         }
 
-        .content-panel {
-            background: #f4f1ec;
-            border-radius: 30px;
-            padding: 28px 34px 34px 34px;
-            margin-top: 1rem;
-            box-shadow: 0 26px 80px rgba(17, 24, 39, 0.18);
-            border: 1px solid rgba(255,255,255,0.18);
-        }
-
         .trust-strip {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -655,6 +647,7 @@ st.markdown(
             letter-spacing: -0.035em;
             color: var(--ec-black);
             margin-bottom: 0.25rem;
+            margin-top: 1.25rem;
         }
 
         .section-title:before {
@@ -1034,70 +1027,68 @@ logo_html = ""
 if logo_src:
     logo_html = f'<img src="{logo_src}" class="hero-logo" alt="Evolved Commerce logo">'
 
-st.markdown(
-    f"""
-    <div class="site-hero">
-        <div class="site-hero-top">
-            {logo_html}
-            <div class="hero-nav">
-                <span>Amazon Ads Audit</span>
-                <span>Growth Insights</span>
-                <span class="nav-cta">Free Report</span>
-            </div>
-        </div>
-
-        <div class="site-hero-content">
-            <div class="site-hero-copy">
-                <div class="hero-kicker">Free Amazon Advertising Audit</div>
-                <div class="brand-title">
-                    Your Free<br>
-                    <span class="accent">Amazon Ads Audit</span>
-                </div>
-                <div class="brand-subtitle">
-                    Upload your recent Amazon reports and uncover wasted spend, campaign inefficiencies,
-                    winning search terms, and growth opportunities your brand can act on.
-                </div>
-                <div class="hero-button-row">
-                    <span class="hero-primary-pill">Generate Free Audit</span>
-                    <span class="hero-secondary-pill">Amazon Ads Growth Review</span>
-                </div>
-            </div>
-
-            <div class="site-hero-visual">
-                <div class="orange-shape"></div>
-                <div class="audit-card floating-one">
-                    <strong>Wasted Spend</strong>
-                    <span>Find inefficient clicks and high ACOS terms.</span>
-                </div>
-                <div class="audit-card floating-two">
-                    <strong>Growth Terms</strong>
-                    <span>Surface the search terms driving sales.</span>
-                </div>
-                <div class="partner-badge">
-                    amazon ads<br><strong>audit ready</strong>
-                </div>
-            </div>
+hero_html = f"""
+<div class="site-hero">
+    <div class="site-hero-top">
+        {logo_html}
+        <div class="hero-nav">
+            <span>Amazon Ads Audit</span>
+            <span>Growth Insights</span>
+            <span class="nav-cta">Free Report</span>
         </div>
     </div>
 
-    <div class="content-panel">
-        <div class="trust-strip">
-            <div class="trust-card">
-                <strong>Built for Amazon brands</strong>
-                <span>Review ads performance, search terms, targeting, and account efficiency in one guided workflow.</span>
+    <div class="site-hero-content">
+        <div class="site-hero-copy">
+            <div class="hero-kicker">Free Amazon Advertising Audit</div>
+            <div class="brand-title">
+                Your Free<br>
+                <span class="accent">Amazon Ads Audit</span>
             </div>
-            <div class="trust-card">
-                <strong>Focused on profitable growth</strong>
-                <span>Spot wasted spend, identify winners, and understand where advertising is helping or hurting sales velocity.</span>
+            <div class="brand-subtitle">
+                Upload your recent Amazon reports and uncover wasted spend, campaign inefficiencies,
+                winning search terms, and growth opportunities your brand can act on.
             </div>
-            <div class="trust-card">
-                <strong>Personalized report output</strong>
-                <span>Submit your details after the preview to generate a shareable Google Sheets audit for your brand.</span>
+            <div class="hero-button-row">
+                <span class="hero-primary-pill">Generate Free Audit</span>
+                <span class="hero-secondary-pill">Amazon Ads Growth Review</span>
             </div>
         </div>
-    """,
-    unsafe_allow_html=True,
-)
+
+        <div class="site-hero-visual">
+            <div class="orange-shape"></div>
+            <div class="audit-card floating-one">
+                <strong>Wasted Spend</strong>
+                <span>Find inefficient clicks and high ACOS terms.</span>
+            </div>
+            <div class="audit-card floating-two">
+                <strong>Growth Terms</strong>
+                <span>Surface the search terms driving sales.</span>
+            </div>
+            <div class="partner-badge">
+                amazon ads<br><strong>audit ready</strong>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="trust-strip">
+    <div class="trust-card">
+        <strong>Built for Amazon brands</strong>
+        <span>Review ads performance, search terms, targeting, and account efficiency in one guided workflow.</span>
+    </div>
+    <div class="trust-card">
+        <strong>Focused on profitable growth</strong>
+        <span>Spot wasted spend, identify winners, and understand where advertising is helping or hurting sales velocity.</span>
+    </div>
+    <div class="trust-card">
+        <strong>Personalized report output</strong>
+        <span>Submit your details after the preview to generate a shareable Google Sheets audit for your brand.</span>
+    </div>
+</div>
+"""
+
+st.markdown(textwrap.dedent(hero_html), unsafe_allow_html=True)
 
 
 # =========================================================
@@ -1404,12 +1395,13 @@ if results:
 
     if st.session_state["unlock_complete"] and st.session_state["created_report"]:
         created_report = st.session_state["created_report"]
+        report_url = created_report.get("url", "")
         st.success("Your personalized audit is ready.")
         st.markdown(
             f"""
             <div class="summary-box">
                 <strong>Your Google Sheets audit has been created.</strong><br>
-                <a href="{created_report["url"]}" target="_blank">Open your personalized Amazon Ads audit →</a>
+                <a href="{report_url}" target="_blank">Open your personalized Amazon Ads audit →</a>
             </div>
             """,
             unsafe_allow_html=True,
@@ -1448,22 +1440,20 @@ else:
 
 
 # =========================================================
-# FOOTER / CLOSE CONTENT PANEL
+# FOOTER
 # =========================================================
-st.markdown(
-    """
-        <div style="
-            text-align:center;
-            color:#686868;
-            font-size:0.86rem;
-            font-weight:600;
-            margin-top:2rem;
-            padding-top:1rem;
-            border-top:1px solid #ded8d0;
-        ">
-            Free Amazon Ads Audit by Evolved Commerce
-        </div>
-    </div>
-    """,
-    unsafe_allow_html=True,
-)
+footer_html = """
+<div style="
+    text-align:center;
+    color:#cfd6dd;
+    font-size:0.86rem;
+    font-weight:600;
+    margin-top:2rem;
+    padding-top:1rem;
+    border-top:1px solid rgba(255,255,255,0.12);
+">
+    Free Amazon Ads Audit by Evolved Commerce
+</div>
+"""
+
+st.markdown(textwrap.dedent(footer_html), unsafe_allow_html=True)
