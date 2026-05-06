@@ -8,11 +8,15 @@ import streamlit as st
 from sales_audit_ingestion import SalesAuditEngine
 
 
+# =========================================================
+# PAGE CONFIG
+# =========================================================
 st.set_page_config(
     page_title="Free Amazon Ads Audit | Evolved Commerce",
     page_icon="assets/ec_logo.png",
     layout="wide",
 )
+
 
 # =========================================================
 # SESSION STATE
@@ -83,12 +87,12 @@ def format_number(value: float) -> str:
 def render_metric_card(label: str, value: str, tone: str = "brand", small: bool = False) -> None:
     value_class = "metric-value small" if small else "metric-value"
     st.markdown(
-        f'''
+        f"""
         <div class="metric-card {tone}">
             <div class="metric-label">{label}</div>
             <div class="{value_class}">{value}</div>
         </div>
-        ''',
+        """,
         unsafe_allow_html=True,
     )
 
@@ -114,12 +118,14 @@ def simplify_term_table(df: pd.DataFrame, term_col: str) -> pd.DataFrame:
     keep_cols = [c for c in [term_col, "spend", "sales", "acos_pct"] if c in out.columns]
     out = out[keep_cols].copy()
 
-    out = out.rename(columns={
-        term_col: "term",
-        "spend": "spend",
-        "sales": "sales",
-        "acos_pct": "acos",
-    })
+    out = out.rename(
+        columns={
+            term_col: "term",
+            "spend": "spend",
+            "sales": "sales",
+            "acos_pct": "acos",
+        }
+    )
 
     out["spend"] = pd.to_numeric(out["spend"], errors="coerce").fillna(0)
     out["sales"] = pd.to_numeric(out["sales"], errors="coerce").fillna(0)
@@ -151,13 +157,13 @@ def simplify_campaign_table(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def build_sheet_term_table(df: pd.DataFrame, term_col: str) -> pd.DataFrame:
-    '''
+    """
     Build raw numeric rows for the Google Sheet payload.
 
     NOTE:
     For this audit workflow, the term-level spend/sales tables are arriving in cents,
     while the KPI summary is already in dollars. We normalize to dollars here.
-    '''
+    """
     if df is None or df.empty:
         return pd.DataFrame()
 
@@ -169,12 +175,14 @@ def build_sheet_term_table(df: pd.DataFrame, term_col: str) -> pd.DataFrame:
     keep_cols = [c for c in [term_col, "spend", "sales", "acos_pct"] if c in out.columns]
     out = out[keep_cols].copy()
 
-    out = out.rename(columns={
-        term_col: "term",
-        "spend": "spend",
-        "sales": "sales",
-        "acos_pct": "acos",
-    })
+    out = out.rename(
+        columns={
+            term_col: "term",
+            "spend": "spend",
+            "sales": "sales",
+            "acos_pct": "acos",
+        }
+    )
 
     out["spend"] = pd.to_numeric(out["spend"], errors="coerce").fillna(0)
     out["sales"] = pd.to_numeric(out["sales"], errors="coerce").fillna(0)
@@ -315,7 +323,7 @@ def create_google_sheet_report(
 # STYLING
 # =========================================================
 st.markdown(
-    '''
+    """
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 
@@ -355,7 +363,6 @@ st.markdown(
             max-width: 1360px;
         }
 
-        /* Sidebar */
         [data-testid="stSidebar"] {
             background: #111111;
             border-right: 1px solid rgba(255,255,255,0.08);
@@ -380,16 +387,8 @@ st.markdown(
             background: var(--ec-orange) !important;
             border-color: var(--ec-orange) !important;
             color: #ffffff !important;
-            box-shadow: 0 14px 28px rgba(244, 115, 34, 0.22);
         }
 
-        [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p,
-        [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] li {
-            font-size: 0.91rem;
-            line-height: 1.5;
-        }
-
-        /* Header / landing hero */
         .hero-wrap {
             background: #ffffff;
             border: 1px solid var(--ec-border);
@@ -429,7 +428,6 @@ st.markdown(
         .hero-kicker {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
             padding: 7px 13px;
             background: var(--ec-orange-soft);
             border: 1px solid rgba(244, 115, 34, 0.25);
@@ -527,7 +525,6 @@ st.markdown(
             font-weight: 500;
         }
 
-        /* Section headings */
         .section-title {
             font-size: 1.32rem;
             font-weight: 900;
@@ -555,7 +552,6 @@ st.markdown(
             font-weight: 500;
         }
 
-        /* Metric cards */
         .metric-card {
             background: var(--ec-card);
             border: 1px solid var(--ec-border);
@@ -600,7 +596,6 @@ st.markdown(
         .metric-card.bad { border-left: 6px solid var(--ec-red); }
         .metric-card.brand { border-left: 6px solid var(--ec-orange); }
 
-        /* Health + summary */
         .status-pill {
             display: inline-flex;
             align-items: center;
@@ -697,7 +692,6 @@ st.markdown(
             margin-bottom: 13px;
         }
 
-        /* Native Streamlit widgets */
         [data-testid="stFileUploader"] {
             background: #ffffff;
             border: 1px dashed rgba(244,115,34,0.48);
@@ -803,7 +797,7 @@ st.markdown(
             }
         }
     </style>
-    ''',
+    """,
     unsafe_allow_html=True,
 )
 
@@ -814,7 +808,7 @@ st.markdown(
 with st.sidebar:
     st.markdown("## Free Audit Checklist")
     st.markdown(
-        '''
+        """
 Upload these reports to generate your audit:
 
 - Bulk Sheet
@@ -823,30 +817,30 @@ Upload these reports to generate your audit:
 - Sponsored Products Impression Share Report
 - Sales & Traffic Business Report
 - Sponsored Brands Campaign Report *(optional)*
-'''
+"""
     )
 
     st.markdown("---")
 
     st.markdown("## What You’ll See")
     st.markdown(
-        '''
+        """
 - Account health verdict
 - Executive KPI snapshot
 - Wasted spend indicators
 - Top keywords and search terms
 - Campaign-level performance summary
 - Personalized Google Sheets audit
-'''
+"""
     )
 
     st.markdown("---")
 
     st.markdown("## Best Results")
     st.markdown(
-        '''
+        """
 Use matching date ranges where possible. The Sponsored Brands report helps populate new-to-brand context, but it is not required.
-'''
+"""
     )
 
     if st.button("Start over", use_container_width=True):
@@ -870,11 +864,11 @@ with header_left:
     if logo_path:
         st.markdown('<div class="logo-card">', unsafe_allow_html=True)
         st.image(logo_path, use_container_width=True)
-        st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown("</div>", unsafe_allow_html=True)
 
 with header_right:
     st.markdown(
-        '''
+        """
         <div class="hero-wrap">
             <div class="hero-inner">
                 <div class="hero-kicker">Free Amazon Advertising Audit</div>
@@ -896,12 +890,12 @@ with header_right:
                 </div>
             </div>
         </div>
-        ''',
+        """,
         unsafe_allow_html=True,
     )
 
 st.markdown(
-    '''
+    """
     <div class="trust-strip">
         <div class="trust-card">
             <strong>Built for Amazon brands</strong>
@@ -916,7 +910,7 @@ st.markdown(
             <span>Submit your details after the preview to generate a shareable Google Sheets audit for your brand.</span>
         </div>
     </div>
-    ''',
+    """,
     unsafe_allow_html=True,
 )
 
@@ -944,24 +938,46 @@ u5, u6 = st.columns(2)
 with u1:
     bulk_file = st.file_uploader("Bulk Sheet", type=["xlsx", "xls", "csv"], key="sales_audit_bulk_file")
 with u2:
-    impression_share_file = st.file_uploader("SP Impression Share Report", type=["csv", "xlsx", "xls"], key="sales_audit_impression_share_file")
+    impression_share_file = st.file_uploader(
+        "SP Impression Share Report",
+        type=["csv", "xlsx", "xls"],
+        key="sales_audit_impression_share_file",
+    )
 with u3:
-    targeting_file = st.file_uploader("SP Targeting Report", type=["csv", "xlsx", "xls"], key="sales_audit_targeting_file")
+    targeting_file = st.file_uploader(
+        "SP Targeting Report",
+        type=["csv", "xlsx", "xls"],
+        key="sales_audit_targeting_file",
+    )
 with u4:
-    search_term_file = st.file_uploader("SP Search Term Report", type=["csv", "xlsx", "xls"], key="sales_audit_search_term_file")
+    search_term_file = st.file_uploader(
+        "SP Search Term Report",
+        type=["csv", "xlsx", "xls"],
+        key="sales_audit_search_term_file",
+    )
 with u5:
-    business_report_file = st.file_uploader("Sales & Traffic Business Report", type=["csv", "xlsx", "xls"], key="sales_audit_business_report_file")
+    business_report_file = st.file_uploader(
+        "Sales & Traffic Business Report",
+        type=["csv", "xlsx", "xls"],
+        key="sales_audit_business_report_file",
+    )
 with u6:
-    sb_campaign_file = st.file_uploader("Sponsored Brands Campaign Report (optional)", type=["csv", "xlsx", "xls"], key="sales_audit_sb_campaign_file")
+    sb_campaign_file = st.file_uploader(
+        "Sponsored Brands Campaign Report (optional)",
+        type=["csv", "xlsx", "xls"],
+        key="sales_audit_sb_campaign_file",
+    )
 
-required_ready = all([
-    brand_name_input.strip(),
-    bulk_file is not None,
-    impression_share_file is not None,
-    targeting_file is not None,
-    search_term_file is not None,
-    business_report_file is not None,
-])
+required_ready = all(
+    [
+        brand_name_input.strip(),
+        bulk_file is not None,
+        impression_share_file is not None,
+        targeting_file is not None,
+        search_term_file is not None,
+        business_report_file is not None,
+    ]
+)
 
 st.markdown(
     f'<div class="upload-note">{"Ready to generate your audit." if required_ready else "Add your brand name and all five required reports to unlock the audit button."}</div>',
@@ -969,7 +985,7 @@ st.markdown(
 )
 
 run_clicked = st.button(
-    "Get My Free Audit",
+    "Generate My Free Audit",
     type="primary",
     use_container_width=True,
     disabled=not required_ready,
@@ -1007,6 +1023,10 @@ if run_clicked:
         except Exception as exc:
             st.error(f"Sales audit failed: {exc}")
 
+
+# =========================================================
+# RESULTS
+# =========================================================
 results = safe_dict(st.session_state.get("sales_audit_results", {}))
 brand_name = str(results.get("brand_name", st.session_state.get("lead_brand_name", ""))).strip()
 
@@ -1021,12 +1041,10 @@ if results:
     winner_tables = safe_dict(results.get("winner_tables"))
     narrative = str(results.get("narrative", "")).strip()
 
-    # UI tables
     top_kw = simplify_term_table(keyword_spend_table, "target").head(20)
     top_st = simplify_term_table(search_term_spend_table, "customer_search_term").head(20)
     campaign_view = simplify_campaign_table(campaign_summary).head(20)
 
-    # Raw sheet tables
     top_kw_sheet = build_sheet_term_table(keyword_spend_table, "target").head(20)
     top_st_sheet = build_sheet_term_table(search_term_spend_table, "customer_search_term").head(20)
 
@@ -1069,18 +1087,20 @@ if results:
     status = health_summary.get("status", "Unknown")
     tone = tone_from_health(status)
     st.markdown(f'<div class="status-pill {tone}">{status}</div>', unsafe_allow_html=True)
+
     st.markdown(
-        f'''
+        f"""
         <div class="summary-box">
             <strong>Summary:</strong> {health_summary.get("summary", "No summary available.")}
             <br><br>
             <strong>Narrative:</strong> {narrative}
         </div>
-        ''',
+        """,
         unsafe_allow_html=True,
     )
 
     st.markdown('<div class="section-title">Executive KPI Snapshot</div>', unsafe_allow_html=True)
+
     r1 = st.columns(4)
     with r1[0]:
         render_metric_card("Spend", format_currency(kpis.get("spend")), tone="brand")
@@ -1101,9 +1121,8 @@ if results:
     with r2[3]:
         render_metric_card("Wasted Spend", format_currency(waste_summary.get("wasted_spend")), tone="bad")
 
-    # CENTERED LEAD FORM
     st.markdown(
-        '''
+        """
         <div class="lead-card">
             <span class="mini">Your personalized report is ready to build</span>
             <h2>Get your free Amazon Ads audit report.</h2>
@@ -1112,7 +1131,7 @@ if results:
                 with your KPI snapshot, wasted spend review, winning terms, and campaign summary.
             </p>
         </div>
-        ''',
+        """,
         unsafe_allow_html=True,
     )
 
@@ -1188,17 +1207,18 @@ if results:
         created_report = st.session_state["created_report"]
         st.success("Your personalized audit is ready.")
         st.markdown(
-            f'''
+            f"""
             <div class="summary-box">
                 <strong>Your Google Sheets audit has been created.</strong><br>
-                <a href="{created_report['url']}" target="_blank">Open your personalized Amazon Ads audit →</a>
+                <a href="{created_report["url"]}" target="_blank">Open your personalized Amazon Ads audit →</a>
             </div>
-            ''',
+            """,
             unsafe_allow_html=True,
         )
 
     st.markdown("---")
     st.markdown("### Quick Overview")
+
     overview_left, overview_right = st.columns(2)
 
     with overview_left:
@@ -1223,11 +1243,16 @@ if results:
             st.dataframe(campaign_view, use_container_width=True, hide_index=True)
         else:
             st.info("No campaign summary available.")
-else:
-    st.info("Upload your reports and click Audit My Account to begin.")
 
+else:
+    st.info("Upload your reports and click Generate My Free Audit to begin.")
+
+
+# =========================================================
+# FOOTER
+# =========================================================
 st.markdown(
-    '''
+    """
     <div style="
         text-align:center;
         color:#686868;
@@ -1239,6 +1264,6 @@ st.markdown(
     ">
         Free Amazon Ads Audit by Evolved Commerce
     </div>
-    ''',
+    """,
     unsafe_allow_html=True,
 )
