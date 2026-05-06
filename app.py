@@ -640,6 +640,97 @@ st.markdown(
             font-weight: 500;
         }
 
+        .audit-form-card {
+            background: #f4f1ec;
+            border: 1px solid rgba(255,255,255,0.14);
+            border-radius: 30px;
+            padding: 30px 34px 34px 34px;
+            margin-top: 1.25rem;
+            box-shadow: 0 26px 80px rgba(17, 24, 39, 0.18);
+        }
+
+        .audit-form-header {
+            margin-bottom: 1.35rem;
+        }
+
+        .audit-form-title {
+            font-size: 2.05rem;
+            line-height: 1;
+            letter-spacing: -0.055em;
+            font-weight: 900;
+            color: #1f2833;
+            margin: 0 0 0.45rem 0;
+        }
+
+        .audit-form-title:before {
+            content: "";
+            display: inline-block;
+            width: 11px;
+            height: 11px;
+            background: #ff6a00;
+            border-radius: 999px;
+            margin-right: 11px;
+            transform: translateY(-3px);
+        }
+
+        .audit-form-subtitle {
+            color: #5d6670;
+            font-size: 1rem;
+            line-height: 1.55;
+            font-weight: 600;
+            max-width: 860px;
+        }
+
+        .required-pill-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 14px;
+        }
+
+        .required-pill {
+            background: #ffffff;
+            border: 1px solid #ded8d0;
+            color: #1f2833;
+            border-radius: 999px;
+            padding: 7px 11px;
+            font-size: 0.78rem;
+            font-weight: 800;
+        }
+
+        .brand-entry-card {
+            background: #ffffff;
+            border: 1px solid #ded8d0;
+            border-radius: 24px;
+            padding: 20px 22px;
+            margin-bottom: 1rem;
+            box-shadow: 0 14px 38px rgba(17,17,17,0.07);
+        }
+
+        .brand-helper-card {
+            background: #1f2833;
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 20px;
+            padding: 18px 20px;
+            margin-top: 0;
+            box-shadow: 0 14px 34px rgba(17,24,39,0.18);
+        }
+
+        .brand-helper-card strong {
+            display: block;
+            color: #ffffff;
+            font-weight: 900;
+            margin-bottom: 5px;
+        }
+
+        .brand-helper-card span {
+            display: block;
+            color: rgba(255,255,255,0.76);
+            font-size: 0.92rem;
+            line-height: 1.45;
+            font-weight: 600;
+        }
+
         .section-title {
             font-size: 1.32rem;
             font-weight: 900;
@@ -666,30 +757,6 @@ st.markdown(
             margin-bottom: 1rem;
             line-height: 1.5;
             font-weight: 500;
-        }
-
-        .brand-helper-card {
-            background: #ffffff;
-            border: 1px solid #e3ddd5;
-            border-radius: 18px;
-            padding: 15px 17px;
-            margin-top: 1.7rem;
-            box-shadow: 0 12px 34px rgba(17,24,39,0.06);
-        }
-
-        .brand-helper-card strong {
-            display: block;
-            color: var(--ec-black);
-            font-weight: 900;
-            margin-bottom: 4px;
-        }
-
-        .brand-helper-card span {
-            display: block;
-            color: #5d6670;
-            font-size: 0.9rem;
-            line-height: 1.45;
-            font-weight: 600;
         }
 
         .metric-card {
@@ -783,11 +850,15 @@ st.markdown(
         }
 
         .upload-note {
-            color: var(--ec-muted);
-            font-size: 0.93rem;
-            margin-top: 0.1rem;
-            margin-bottom: 0.75rem;
-            font-weight: 700;
+            background: #ffffff;
+            border: 1px solid #ded8d0;
+            border-radius: 16px;
+            padding: 13px 15px;
+            color: #5d6670;
+            font-size: 0.94rem;
+            margin-top: 0.4rem;
+            margin-bottom: 0.8rem;
+            font-weight: 800;
         }
 
         .lead-card {
@@ -832,36 +903,79 @@ st.markdown(
             margin-bottom: 13px;
         }
 
-        [data-testid="stFileUploader"] {
-            background: #ffffff;
-            border: 1px dashed rgba(255,106,0,0.48);
-            border-radius: 20px;
-            padding: 0.85rem;
-            box-shadow: 0 10px 26px rgba(17,17,17,0.045);
-        }
-
         div[data-testid="stTextInput"] {
             max-width: 100%;
         }
 
         div[data-testid="stTextInput"] label {
-            font-weight: 800 !important;
-            color: var(--ec-black) !important;
-            margin-bottom: 0.35rem !important;
+            font-weight: 900 !important;
+            color: #1f2833 !important;
+            margin-bottom: 0.45rem !important;
         }
 
         .stTextInput input {
             border-radius: 16px !important;
             border: 1px solid #d9d3ca !important;
-            min-height: 52px !important;
-            padding-left: 16px !important;
-            font-size: 0.98rem !important;
+            min-height: 54px !important;
+            padding-left: 17px !important;
+            font-size: 1rem !important;
             background: #ffffff !important;
+            color: #1f2833 !important;
         }
 
         .stTextInput input:focus {
-            border-color: var(--ec-orange) !important;
+            border-color: #ff6a00 !important;
             box-shadow: 0 0 0 4px rgba(255, 106, 0, 0.14) !important;
+        }
+
+        [data-testid="stFileUploader"] {
+            background: #ffffff;
+            border: 1px solid #ded8d0;
+            border-radius: 22px;
+            padding: 0.85rem;
+            box-shadow: 0 14px 34px rgba(17,17,17,0.065);
+        }
+
+        [data-testid="stFileUploader"]:hover {
+            border-color: rgba(255,106,0,0.55);
+            box-shadow: 0 18px 42px rgba(17,17,17,0.09);
+        }
+
+        [data-testid="stFileUploader"] section {
+            background: #fbfaf7 !important;
+            border: 1px dashed rgba(255,106,0,0.45) !important;
+            border-radius: 18px !important;
+            padding: 18px !important;
+        }
+
+        [data-testid="stFileUploader"] label {
+            color: #1f2833 !important;
+            font-weight: 900 !important;
+            font-size: 0.9rem !important;
+        }
+
+        [data-testid="stFileUploader"] small {
+            color: #5d6670 !important;
+            font-weight: 600 !important;
+        }
+
+        [data-testid="stFileUploader"] button {
+            background: #ff6a00 !important;
+            color: #ffffff !important;
+            border: 1px solid #ff6a00 !important;
+            border-radius: 999px !important;
+            font-weight: 900 !important;
+            box-shadow: 0 10px 24px rgba(255,106,0,0.22) !important;
+        }
+
+        [data-testid="stFileUploader"] button:hover {
+            background: #f26300 !important;
+            border-color: #f26300 !important;
+            color: #ffffff !important;
+        }
+
+        [data-testid="stFileUploader"] button * {
+            color: #ffffff !important;
         }
 
         .stButton > button {
@@ -884,20 +998,24 @@ st.markdown(
 
         .stButton > button[kind="primary"],
         button[kind="primary"] {
-            background: var(--ec-orange) !important;
-            border-color: var(--ec-orange) !important;
+            background: #ff6a00 !important;
+            border-color: #ff6a00 !important;
             color: #ffffff !important;
+            border-radius: 999px !important;
+            font-weight: 900 !important;
+            min-height: 54px !important;
+            box-shadow: 0 16px 34px rgba(255,106,0,0.25) !important;
         }
 
         .stButton > button[kind="primary"]:hover,
         button[kind="primary"]:hover {
-            background: var(--ec-orange-dark) !important;
-            border-color: var(--ec-orange-dark) !important;
+            background: #f26300 !important;
+            border-color: #f26300 !important;
         }
 
         .stButton > button:disabled {
-            background: #cfc7bd !important;
-            border-color: #cfc7bd !important;
+            background: #d7cec4 !important;
+            border-color: #d7cec4 !important;
             color: #ffffff !important;
             box-shadow: none !important;
         }
@@ -1090,66 +1208,98 @@ st.markdown(hero_html, unsafe_allow_html=True)
 # =========================================================
 # INPUTS
 # =========================================================
-st.markdown('<div class="section-title">Start Your Free Audit</div>', unsafe_allow_html=True)
 st.markdown(
-    '<div class="section-note">Enter your brand name and upload the five required Amazon reports. Optional Sponsored Brands data can make the audit more complete.</div>',
+    """
+    <div class="audit-form-card">
+        <div class="audit-form-header">
+            <div class="audit-form-title">Start Your Free Audit</div>
+            <div class="audit-form-subtitle">
+                Add your brand name and upload the five required Amazon reports. We’ll use them to find wasted spend,
+                winning terms, campaign issues, and growth opportunities.
+            </div>
+            <div class="required-pill-row">
+                <span class="required-pill">Bulk Sheet</span>
+                <span class="required-pill">SP Search Terms</span>
+                <span class="required-pill">SP Targeting</span>
+                <span class="required-pill">SP Impression Share</span>
+                <span class="required-pill">Sales & Traffic</span>
+                <span class="required-pill">SB Optional</span>
+            </div>
+        </div>
+    </div>
+    """,
     unsafe_allow_html=True,
 )
 
-brand_left, brand_right = st.columns([1.25, 1])
+brand_left, brand_right = st.columns([1.25, 1], gap="large")
 
 with brand_left:
+    st.markdown('<div class="brand-entry-card">', unsafe_allow_html=True)
     brand_name_input = st.text_input(
         "Brand Name",
         value=st.session_state.get("lead_brand_name", ""),
-        placeholder="Your brand name",
+        placeholder="Enter your Amazon brand name",
         key="sales_audit_brand_name",
     )
+    st.markdown("</div>", unsafe_allow_html=True)
 
 with brand_right:
     st.markdown(
         """
         <div class="brand-helper-card">
             <strong>What happens next?</strong>
-            <span>Once all required files are uploaded, your audit will generate a preview before asking for your contact details.</span>
+            <span>
+                Upload the required reports, generate a preview, then unlock a personalized Google Sheets audit
+                you can share with your team.
+            </span>
         </div>
         """,
         unsafe_allow_html=True,
     )
 
-u1, u2 = st.columns(2)
-u3, u4 = st.columns(2)
-u5, u6 = st.columns(2)
+st.markdown("#### Required Reports")
+u1, u2 = st.columns(2, gap="large")
+u3, u4 = st.columns(2, gap="large")
+u5, u6 = st.columns(2, gap="large")
 
 with u1:
-    bulk_file = st.file_uploader("Bulk Sheet", type=["xlsx", "xls", "csv"], key="sales_audit_bulk_file")
+    bulk_file = st.file_uploader(
+        "1. Bulk Sheet",
+        type=["xlsx", "xls", "csv"],
+        key="sales_audit_bulk_file",
+    )
+
 with u2:
     impression_share_file = st.file_uploader(
-        "SP Impression Share Report",
+        "2. SP Impression Share Report",
         type=["csv", "xlsx", "xls"],
         key="sales_audit_impression_share_file",
     )
+
 with u3:
     targeting_file = st.file_uploader(
-        "SP Targeting Report",
+        "3. SP Targeting Report",
         type=["csv", "xlsx", "xls"],
         key="sales_audit_targeting_file",
     )
+
 with u4:
     search_term_file = st.file_uploader(
-        "SP Search Term Report",
+        "4. SP Search Term Report",
         type=["csv", "xlsx", "xls"],
         key="sales_audit_search_term_file",
     )
+
 with u5:
     business_report_file = st.file_uploader(
-        "Sales & Traffic Business Report",
+        "5. Sales & Traffic Business Report",
         type=["csv", "xlsx", "xls"],
         key="sales_audit_business_report_file",
     )
+
 with u6:
     sb_campaign_file = st.file_uploader(
-        "Sponsored Brands Campaign Report (optional)",
+        "Optional: Sponsored Brands Campaign Report",
         type=["csv", "xlsx", "xls"],
         key="sales_audit_sb_campaign_file",
     )
@@ -1165,10 +1315,13 @@ required_ready = all(
     ]
 )
 
-st.markdown(
-    f'<div class="upload-note">{"Ready to generate your audit." if required_ready else "Add your brand name and all five required reports to unlock the audit button."}</div>',
-    unsafe_allow_html=True,
+status_text = (
+    "Ready to generate your audit."
+    if required_ready
+    else "Add your brand name and all five required reports to unlock the audit button."
 )
+
+st.markdown(f'<div class="upload-note">{status_text}</div>', unsafe_allow_html=True)
 
 run_clicked = st.button(
     "Generate My Free Audit",
