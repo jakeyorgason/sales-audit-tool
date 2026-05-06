@@ -1225,3 +1225,20 @@ if results:
             st.info("No campaign summary available.")
 else:
     st.info("Upload your reports and click Audit My Account to begin.")
+
+st.markdown(
+    '''
+    <div style="
+        text-align:center;
+        color:#686868;
+        font-size:0.86rem;
+        font-weight:600;
+        margin-top:2rem;
+        padding-top:1rem;
+        border-top:1px solid #e9e2da;
+    ">
+        Free Amazon Ads Audit by Evolved Commerce
+    </div>
+    ''',
+    unsafe_allow_html=True,
+)
