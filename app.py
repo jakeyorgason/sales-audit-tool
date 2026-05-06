@@ -15,7 +15,7 @@ from sales_audit_ingestion import SalesAuditEngine
 # =========================================================
 st.set_page_config(
     page_title="Free Amazon Ads Audit | Evolved Commerce",
-    page_icon="assets/ec_logo.png",
+    page_icon="assets/ec_logo2.jpg",
     layout="wide",
 )
 
