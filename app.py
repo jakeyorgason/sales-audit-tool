@@ -1,4 +1,5 @@
 import os
+import base64
 from typing import Any, Optional
 
 import pandas as pd
@@ -70,6 +71,19 @@ def load_logo_path() -> Optional[str]:
         if os.path.exists(path):
             return path
     return None
+
+
+def image_to_base64_src(path: Optional[str]) -> str:
+    if not path or not os.path.exists(path):
+        return ""
+
+    ext = os.path.splitext(path)[1].lower().replace(".", "")
+    mime = "image/png" if ext == "png" else "image/jpeg"
+
+    with open(path, "rb") as image_file:
+        encoded = base64.b64encode(image_file.read()).decode("utf-8")
+
+    return f"data:{mime};base64,{encoded}"
 
 
 def format_currency(value: float) -> str:
@@ -328,18 +342,20 @@ st.markdown(
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 
         :root {
-            --ec-orange: #f47322;
-            --ec-orange-dark: #d85f16;
-            --ec-orange-soft: #fff3ea;
-            --ec-black: #111111;
-            --ec-charcoal: #252525;
-            --ec-muted: #686868;
-            --ec-border: #e9e2da;
-            --ec-bg: #fbfaf7;
+            --ec-orange: #ff6a00;
+            --ec-orange-dark: #f26300;
+            --ec-orange-soft: #fff1e7;
+            --ec-black: #1f2833;
+            --ec-charcoal: #26313d;
+            --ec-muted: #5d6670;
+            --ec-border: #ded8d0;
+            --ec-bg: #f4f1ec;
             --ec-card: #ffffff;
             --ec-green: #16a34a;
             --ec-yellow: #d97706;
             --ec-red: #dc2626;
+            --ec-hero-gray: #d3d7d4;
+            --ec-navy: #202b36;
         }
 
         html, body, [class*="css"] {
@@ -347,9 +363,7 @@ st.markdown(
         }
 
         .stApp {
-            background:
-                radial-gradient(circle at top left, rgba(244, 115, 34, 0.12), transparent 30rem),
-                linear-gradient(180deg, #ffffff 0%, var(--ec-bg) 42%, #ffffff 100%);
+            background: var(--ec-navy);
             color: var(--ec-black);
         }
 
@@ -364,7 +378,7 @@ st.markdown(
         }
 
         [data-testid="stSidebar"] {
-            background: #111111;
+            background: #1f2833;
             border-right: 1px solid rgba(255,255,255,0.08);
         }
 
@@ -383,71 +397,102 @@ st.markdown(
             border-color: rgba(255,255,255,0.14);
         }
 
+        [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p,
+        [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] li {
+            font-size: 0.91rem;
+            line-height: 1.5;
+        }
+
         [data-testid="stSidebar"] .stButton > button {
             background: var(--ec-orange) !important;
             border-color: var(--ec-orange) !important;
             color: #ffffff !important;
+            box-shadow: 0 14px 28px rgba(255, 106, 0, 0.22);
         }
 
-        .hero-wrap {
-            background: #ffffff;
-            border: 1px solid var(--ec-border);
-            border-radius: 30px;
-            padding: 44px 46px 40px 46px;
-            margin-bottom: 1.2rem;
-            box-shadow: 0 26px 80px rgba(17, 17, 17, 0.08);
+        .site-hero {
+            background: var(--ec-hero-gray);
+            border-radius: 34px;
+            padding: 30px 34px 0 34px;
+            margin: 0 auto 1.35rem auto;
+            min-height: 525px;
+            box-shadow: 0 30px 90px rgba(17, 24, 39, 0.22);
             position: relative;
             overflow: hidden;
+            border: 1px solid rgba(17,17,17,0.08);
         }
 
-        .hero-wrap:before {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background:
-                radial-gradient(circle at top right, rgba(244, 115, 34, 0.14), transparent 23rem),
-                linear-gradient(90deg, rgba(255,255,255,0.00), rgba(244,115,34,0.05));
-            pointer-events: none;
-        }
-
-        .hero-wrap:after {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 7px;
-            background: linear-gradient(90deg, var(--ec-orange), #ffb36f);
-        }
-
-        .hero-inner {
+        .site-hero-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
             position: relative;
-            z-index: 1;
+            z-index: 4;
+        }
+
+        .hero-logo {
+            width: 245px;
+            max-width: 42vw;
+            height: auto;
+            display: block;
+        }
+
+        .hero-nav {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            color: #202833;
+            font-size: 0.94rem;
+            font-weight: 700;
+        }
+
+        .nav-cta {
+            background: var(--ec-orange);
+            color: #ffffff;
+            padding: 11px 18px;
+            border-radius: 999px;
+            font-weight: 900;
+            box-shadow: 0 12px 28px rgba(255, 106, 0, 0.25);
+        }
+
+        .site-hero-content {
+            display: grid;
+            grid-template-columns: 1.05fr 0.95fr;
+            gap: 24px;
+            align-items: center;
+            min-height: 440px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .site-hero-copy {
+            padding: 38px 0 48px 8px;
         }
 
         .hero-kicker {
             display: inline-flex;
             align-items: center;
-            padding: 7px 13px;
-            background: var(--ec-orange-soft);
-            border: 1px solid rgba(244, 115, 34, 0.25);
+            padding: 8px 14px;
+            background: rgba(255, 106, 0, 0.12);
+            border: 1px solid rgba(255, 106, 0, 0.24);
             border-radius: 999px;
             color: var(--ec-orange-dark);
             font-size: 0.76rem;
             font-weight: 900;
             letter-spacing: 0.075em;
             text-transform: uppercase;
-            margin-bottom: 15px;
+            margin-bottom: 18px;
         }
 
         .brand-title {
-            font-size: clamp(2.45rem, 5vw, 5.25rem);
+            font-size: clamp(3rem, 5.8vw, 6.1rem);
             font-weight: 900;
-            letter-spacing: -0.075em;
-            line-height: 0.91;
+            letter-spacing: -0.078em;
+            line-height: 0.88;
             margin: 0;
             color: var(--ec-black);
-            max-width: 980px;
+            max-width: 760px;
         }
 
         .brand-title .accent {
@@ -456,41 +501,120 @@ st.markdown(
         }
 
         .brand-subtitle {
-            font-size: 1.08rem;
-            color: var(--ec-muted);
-            margin-top: 1.05rem;
-            max-width: 870px;
-            line-height: 1.65;
-            font-weight: 500;
+            font-size: 1.05rem;
+            color: #3f4852;
+            margin-top: 1.2rem;
+            max-width: 690px;
+            line-height: 1.62;
+            font-weight: 600;
         }
 
-        .hero-pill-row {
+        .hero-button-row {
             display: flex;
             flex-wrap: wrap;
-            gap: 9px;
-            margin-top: 20px;
+            gap: 12px;
+            margin-top: 26px;
         }
 
-        .hero-pill {
-            background: #111111;
+        .hero-primary-pill {
+            background: var(--ec-orange);
             color: #ffffff;
             border-radius: 999px;
-            padding: 8px 12px;
-            font-size: 0.78rem;
-            font-weight: 800;
-            letter-spacing: 0.01em;
+            padding: 13px 22px;
+            font-size: 0.94rem;
+            font-weight: 900;
+            box-shadow: 0 14px 32px rgba(255, 106, 0, 0.28);
         }
 
-        .logo-card {
+        .hero-secondary-pill {
+            background: var(--ec-black);
+            color: #ffffff;
+            border-radius: 999px;
+            padding: 13px 18px;
+            font-size: 0.9rem;
+            font-weight: 800;
+        }
+
+        .site-hero-visual {
+            position: relative;
+            min-height: 395px;
+        }
+
+        .orange-shape {
+            position: absolute;
+            width: 520px;
+            height: 520px;
+            border-radius: 46% 54% 50% 50%;
+            background: linear-gradient(135deg, #ff7a00 0%, #f26300 48%, #ffb347 100%);
+            right: -90px;
+            bottom: -160px;
+            transform: rotate(-18deg);
+            box-shadow: 0 30px 90px rgba(255, 106, 0, 0.28);
+        }
+
+        .audit-card {
+            position: absolute;
+            background: rgba(255,255,255,0.94);
+            border: 1px solid rgba(17,17,17,0.08);
+            border-radius: 18px;
+            padding: 15px 16px;
+            width: 220px;
+            box-shadow: 0 20px 50px rgba(17, 24, 39, 0.16);
+            z-index: 3;
+        }
+
+        .audit-card strong {
+            display: block;
+            color: var(--ec-black);
+            font-weight: 900;
+            letter-spacing: -0.02em;
+            margin-bottom: 5px;
+        }
+
+        .audit-card span {
+            display: block;
+            color: #5b6470;
+            font-size: 0.86rem;
+            line-height: 1.38;
+            font-weight: 600;
+        }
+
+        .floating-one {
+            right: 235px;
+            top: 94px;
+        }
+
+        .floating-two {
+            right: 70px;
+            top: 215px;
+        }
+
+        .partner-badge {
+            position: absolute;
+            right: 20px;
+            bottom: 34px;
             background: #ffffff;
-            border: 1px solid var(--ec-border);
-            border-radius: 26px;
-            padding: 24px;
-            box-shadow: 0 18px 50px rgba(17,17,17,0.065);
-            min-height: 210px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            border-radius: 16px;
+            padding: 13px 16px;
+            color: var(--ec-black);
+            font-size: 0.86rem;
+            line-height: 1.15;
+            font-weight: 800;
+            z-index: 4;
+            box-shadow: 0 16px 42px rgba(17, 24, 39, 0.16);
+        }
+
+        .partner-badge strong {
+            color: var(--ec-orange);
+        }
+
+        .content-panel {
+            background: #f4f1ec;
+            border-radius: 30px;
+            padding: 28px 34px 34px 34px;
+            margin-top: 1rem;
+            box-shadow: 0 26px 80px rgba(17, 24, 39, 0.18);
+            border: 1px solid rgba(255,255,255,0.18);
         }
 
         .trust-strip {
@@ -501,11 +625,11 @@ st.markdown(
         }
 
         .trust-card {
-            background: rgba(255,255,255,0.82);
+            background: rgba(255,255,255,0.92);
             border: 1px solid var(--ec-border);
             border-radius: 22px;
             padding: 17px 18px;
-            box-shadow: 0 14px 36px rgba(17,17,17,0.045);
+            box-shadow: 0 14px 36px rgba(17,17,17,0.08);
         }
 
         .trust-card strong {
@@ -552,20 +676,44 @@ st.markdown(
             font-weight: 500;
         }
 
+        .brand-helper-card {
+            background: #ffffff;
+            border: 1px solid #e3ddd5;
+            border-radius: 18px;
+            padding: 15px 17px;
+            margin-top: 1.7rem;
+            box-shadow: 0 12px 34px rgba(17,24,39,0.06);
+        }
+
+        .brand-helper-card strong {
+            display: block;
+            color: var(--ec-black);
+            font-weight: 900;
+            margin-bottom: 4px;
+        }
+
+        .brand-helper-card span {
+            display: block;
+            color: #5d6670;
+            font-size: 0.9rem;
+            line-height: 1.45;
+            font-weight: 600;
+        }
+
         .metric-card {
             background: var(--ec-card);
             border: 1px solid var(--ec-border);
             border-radius: 22px;
             padding: 17px 18px;
-            box-shadow: 0 14px 38px rgba(17,17,17,0.055);
+            box-shadow: 0 14px 38px rgba(17,17,17,0.07);
             min-height: 104px;
             transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
         }
 
         .metric-card:hover {
             transform: translateY(-2px);
-            box-shadow: 0 20px 48px rgba(17,17,17,0.08);
-            border-color: rgba(244, 115, 34, 0.38);
+            box-shadow: 0 20px 48px rgba(17,17,17,0.10);
+            border-color: rgba(255, 106, 0, 0.38);
         }
 
         .metric-label {
@@ -632,7 +780,7 @@ st.markdown(
             border-radius: 22px;
             padding: 20px 22px;
             margin-bottom: 16px;
-            box-shadow: 0 14px 38px rgba(17,17,17,0.05);
+            box-shadow: 0 14px 38px rgba(17,17,17,0.07);
             color: var(--ec-charcoal);
             line-height: 1.62;
         }
@@ -652,12 +800,12 @@ st.markdown(
 
         .lead-card {
             background:
-                radial-gradient(circle at top right, rgba(244,115,34,0.16), transparent 20rem),
-                #111111;
+                radial-gradient(circle at top right, rgba(255,106,0,0.18), transparent 20rem),
+                var(--ec-black);
             color: #ffffff;
             border-radius: 30px;
             padding: 34px 36px;
-            box-shadow: 0 28px 80px rgba(17,17,17,0.18);
+            box-shadow: 0 28px 80px rgba(17,17,17,0.20);
             margin: 1.5rem 0 1.3rem 0;
             border: 1px solid rgba(255,255,255,0.08);
         }
@@ -694,27 +842,40 @@ st.markdown(
 
         [data-testid="stFileUploader"] {
             background: #ffffff;
-            border: 1px dashed rgba(244,115,34,0.48);
+            border: 1px dashed rgba(255,106,0,0.48);
             border-radius: 20px;
             padding: 0.85rem;
-            box-shadow: 0 10px 26px rgba(17,17,17,0.035);
+            box-shadow: 0 10px 26px rgba(17,17,17,0.045);
+        }
+
+        div[data-testid="stTextInput"] {
+            max-width: 100%;
+        }
+
+        div[data-testid="stTextInput"] label {
+            font-weight: 800 !important;
+            color: var(--ec-black) !important;
+            margin-bottom: 0.35rem !important;
         }
 
         .stTextInput input {
-            border-radius: 14px !important;
-            border: 1px solid var(--ec-border) !important;
-            min-height: 44px;
+            border-radius: 16px !important;
+            border: 1px solid #d9d3ca !important;
+            min-height: 52px !important;
+            padding-left: 16px !important;
+            font-size: 0.98rem !important;
+            background: #ffffff !important;
         }
 
         .stTextInput input:focus {
             border-color: var(--ec-orange) !important;
-            box-shadow: 0 0 0 3px rgba(244,115,34,0.14) !important;
+            box-shadow: 0 0 0 4px rgba(255, 106, 0, 0.14) !important;
         }
 
         .stButton > button {
             border-radius: 999px !important;
-            border: 1px solid #111111 !important;
-            background: #111111 !important;
+            border: 1px solid var(--ec-black) !important;
+            background: var(--ec-black) !important;
             color: #ffffff !important;
             font-weight: 900 !important;
             padding: 0.78rem 1.25rem !important;
@@ -726,7 +887,7 @@ st.markdown(
             background: var(--ec-orange) !important;
             border-color: var(--ec-orange) !important;
             transform: translateY(-1px);
-            box-shadow: 0 18px 38px rgba(244,115,34,0.24);
+            box-shadow: 0 18px 38px rgba(255,106,0,0.24);
         }
 
         .stButton > button[kind="primary"],
@@ -743,8 +904,8 @@ st.markdown(
         }
 
         .stButton > button:disabled {
-            background: #d8d3cc !important;
-            border-color: #d8d3cc !important;
+            background: #cfc7bd !important;
+            border-color: #cfc7bd !important;
             color: #ffffff !important;
             box-shadow: none !important;
         }
@@ -753,14 +914,14 @@ st.markdown(
             border: 1px solid var(--ec-border);
             border-radius: 18px;
             overflow: hidden;
-            box-shadow: 0 12px 34px rgba(17,17,17,0.045);
+            box-shadow: 0 12px 34px rgba(17,17,17,0.06);
         }
 
         div[data-testid="stExpander"] {
-            background: rgba(255,255,255,0.85);
+            background: rgba(255,255,255,0.92);
             border: 1px solid var(--ec-border);
             border-radius: 18px;
-            box-shadow: 0 10px 28px rgba(17,17,17,0.04);
+            box-shadow: 0 10px 28px rgba(17,17,17,0.05);
             overflow: hidden;
         }
 
@@ -779,21 +940,30 @@ st.markdown(
             font-weight: 800;
         }
 
-        @media (max-width: 900px) {
+        @media (max-width: 1000px) {
+            .site-hero-content {
+                grid-template-columns: 1fr;
+            }
+
+            .site-hero-visual {
+                display: none;
+            }
+
+            .site-hero {
+                min-height: auto;
+                padding-bottom: 34px;
+            }
+
+            .hero-nav {
+                display: none;
+            }
+
             .trust-strip {
                 grid-template-columns: 1fr;
             }
 
-            .hero-wrap {
-                padding: 34px 26px;
-            }
-
             .brand-title {
-                font-size: 2.65rem;
-            }
-
-            .lead-card {
-                padding: 28px 24px;
+                font-size: 3.1rem;
             }
         }
     </style>
@@ -858,58 +1028,73 @@ Use matching date ranges where possible. The Sponsored Brands report helps popul
 # HEADER
 # =========================================================
 logo_path = load_logo_path()
-header_left, header_right = st.columns([1.15, 5.85], gap="large")
+logo_src = image_to_base64_src(logo_path)
 
-with header_left:
-    if logo_path:
-        st.markdown('<div class="logo-card">', unsafe_allow_html=True)
-        st.image(logo_path, use_container_width=True)
-        st.markdown("</div>", unsafe_allow_html=True)
+logo_html = ""
+if logo_src:
+    logo_html = f'<img src="{logo_src}" class="hero-logo" alt="Evolved Commerce logo">'
 
-with header_right:
-    st.markdown(
-        """
-        <div class="hero-wrap">
-            <div class="hero-inner">
+st.markdown(
+    f"""
+    <div class="site-hero">
+        <div class="site-hero-top">
+            {logo_html}
+            <div class="hero-nav">
+                <span>Amazon Ads Audit</span>
+                <span>Growth Insights</span>
+                <span class="nav-cta">Free Report</span>
+            </div>
+        </div>
+
+        <div class="site-hero-content">
+            <div class="site-hero-copy">
                 <div class="hero-kicker">Free Amazon Advertising Audit</div>
                 <div class="brand-title">
-                    Find wasted spend.<br>
-                    <span class="accent">Unlock growth.</span>
+                    Your Free<br>
+                    <span class="accent">Amazon Ads Audit</span>
                 </div>
                 <div class="brand-subtitle">
-                    Upload your recent Amazon reports and get a personalized audit that highlights
-                    inefficient spend, strongest revenue drivers, top search opportunities, and
-                    campaign-level issues your team can act on.
+                    Upload your recent Amazon reports and uncover wasted spend, campaign inefficiencies,
+                    winning search terms, and growth opportunities your brand can act on.
                 </div>
-                <div class="hero-pill-row">
-                    <span class="hero-pill">Amazon Ads</span>
-                    <span class="hero-pill">Wasted Spend</span>
-                    <span class="hero-pill">Search Terms</span>
-                    <span class="hero-pill">Campaign Health</span>
-                    <span class="hero-pill">Free Report</span>
+                <div class="hero-button-row">
+                    <span class="hero-primary-pill">Generate Free Audit</span>
+                    <span class="hero-secondary-pill">Amazon Ads Growth Review</span>
+                </div>
+            </div>
+
+            <div class="site-hero-visual">
+                <div class="orange-shape"></div>
+                <div class="audit-card floating-one">
+                    <strong>Wasted Spend</strong>
+                    <span>Find inefficient clicks and high ACOS terms.</span>
+                </div>
+                <div class="audit-card floating-two">
+                    <strong>Growth Terms</strong>
+                    <span>Surface the search terms driving sales.</span>
+                </div>
+                <div class="partner-badge">
+                    amazon ads<br><strong>audit ready</strong>
                 </div>
             </div>
         </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-st.markdown(
-    """
-    <div class="trust-strip">
-        <div class="trust-card">
-            <strong>Built for Amazon brands</strong>
-            <span>Review ads performance, search terms, targeting, and account efficiency in one guided workflow.</span>
-        </div>
-        <div class="trust-card">
-            <strong>Focused on profitable growth</strong>
-            <span>Spot wasted spend, identify winners, and understand where advertising is helping or hurting sales velocity.</span>
-        </div>
-        <div class="trust-card">
-            <strong>Personalized report output</strong>
-            <span>Submit your details after the preview to generate a shareable Google Sheets audit for your brand.</span>
-        </div>
     </div>
+
+    <div class="content-panel">
+        <div class="trust-strip">
+            <div class="trust-card">
+                <strong>Built for Amazon brands</strong>
+                <span>Review ads performance, search terms, targeting, and account efficiency in one guided workflow.</span>
+            </div>
+            <div class="trust-card">
+                <strong>Focused on profitable growth</strong>
+                <span>Spot wasted spend, identify winners, and understand where advertising is helping or hurting sales velocity.</span>
+            </div>
+            <div class="trust-card">
+                <strong>Personalized report output</strong>
+                <span>Submit your details after the preview to generate a shareable Google Sheets audit for your brand.</span>
+            </div>
+        </div>
     """,
     unsafe_allow_html=True,
 )
@@ -924,12 +1109,26 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-brand_name_input = st.text_input(
-    "Brand Name",
-    value=st.session_state.get("lead_brand_name", ""),
-    placeholder="Your brand name",
-    key="sales_audit_brand_name",
-)
+brand_left, brand_right = st.columns([1.25, 1])
+
+with brand_left:
+    brand_name_input = st.text_input(
+        "Brand Name",
+        value=st.session_state.get("lead_brand_name", ""),
+        placeholder="Your brand name",
+        key="sales_audit_brand_name",
+    )
+
+with brand_right:
+    st.markdown(
+        """
+        <div class="brand-helper-card">
+            <strong>What happens next?</strong>
+            <span>Once all required files are uploaded, your audit will generate a preview before asking for your contact details.</span>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
 u1, u2 = st.columns(2)
 u3, u4 = st.columns(2)
@@ -1249,20 +1448,21 @@ else:
 
 
 # =========================================================
-# FOOTER
+# FOOTER / CLOSE CONTENT PANEL
 # =========================================================
 st.markdown(
     """
-    <div style="
-        text-align:center;
-        color:#686868;
-        font-size:0.86rem;
-        font-weight:600;
-        margin-top:2rem;
-        padding-top:1rem;
-        border-top:1px solid #e9e2da;
-    ">
-        Free Amazon Ads Audit by Evolved Commerce
+        <div style="
+            text-align:center;
+            color:#686868;
+            font-size:0.86rem;
+            font-weight:600;
+            margin-top:2rem;
+            padding-top:1rem;
+            border-top:1px solid #ded8d0;
+        ">
+            Free Amazon Ads Audit by Evolved Commerce
+        </div>
     </div>
     """,
     unsafe_allow_html=True,
