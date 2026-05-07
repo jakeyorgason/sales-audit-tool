@@ -73,6 +73,19 @@ def load_logo_path() -> Optional[str]:
     return None
 
 
+def load_banner_path() -> Optional[str]:
+    possible_paths = [
+        "assets/ec_banner.png",
+        "assets/ec_banner.jpg",
+        "assets/banner.png",
+        "ec_banner.png",
+    ]
+    for path in possible_paths:
+        if os.path.exists(path):
+            return path
+    return None
+
+
 def image_to_base64_src(path: Optional[str]) -> str:
     if not path or not os.path.exists(path):
         return ""
@@ -438,21 +451,17 @@ st.markdown(
             display: block;
         }
 
-        .hero-badge-row {
+        .hero-banner-wrap {
             display: flex;
+            justify-content: flex-end;
             align-items: center;
-            gap: 10px;
         }
 
-        .hero-status-badge {
-            background: rgba(255,255,255,0.55);
-            color: #1f2833;
-            border: 1px solid rgba(31,40,51,0.12);
-            border-radius: 999px;
-            padding: 9px 13px;
-            font-size: 0.82rem;
-            font-weight: 900;
-            letter-spacing: 0.01em;
+        .hero-banner-logo {
+            width: 360px;
+            max-width: 36vw;
+            height: auto;
+            display: block;
         }
 
         .site-hero-content {
@@ -687,58 +696,29 @@ st.markdown(
             font-weight: 800;
         }
 
-        .brand-field-intro {
-            margin-top: 1.15rem;
-            margin-bottom: 0.75rem;
-        }
-
-        .brand-field-eyebrow {
-            display: inline-flex;
-            align-items: center;
-            background: rgba(255,106,0,0.14);
-            color: #ff6a00;
-            border: 1px solid rgba(255,106,0,0.24);
-            border-radius: 999px;
-            padding: 6px 10px;
-            font-size: 0.74rem;
-            font-weight: 900;
-            text-transform: uppercase;
-            letter-spacing: 0.06em;
-            margin-bottom: 10px;
-        }
-
-        .brand-field-title {
-            color: #ffffff;
-            font-size: 1.32rem;
-            line-height: 1.05;
-            font-weight: 900;
-            letter-spacing: -0.035em;
-            margin-bottom: 5px;
-        }
-
-        .brand-field-copy {
-            color: rgba(255,255,255,0.68);
-            font-size: 0.94rem;
-            line-height: 1.45;
-            font-weight: 650;
-        }
-
-        .brand-helper-card {
-            background: #ffffff;
+        .brand-step-panel {
+            background: #f4f1ec;
             border: 1px solid #ded8d0;
-            border-radius: 22px;
-            padding: 20px 22px;
-            margin-top: 1.15rem;
-            min-height: 142px;
-            box-shadow: 0 18px 42px rgba(17,24,39,0.12);
+            border-radius: 26px;
+            padding: 24px 26px 28px 26px;
+            margin: 1.25rem 0 1.35rem 0;
+            box-shadow: 0 18px 48px rgba(17,24,39,0.16);
         }
 
-        .helper-step {
+        .brand-step-header {
+            display: grid;
+            grid-template-columns: 1.35fr 1fr;
+            gap: 28px;
+            align-items: start;
+            margin-bottom: 16px;
+        }
+
+        .brand-step-eyebrow {
             display: inline-flex;
             align-items: center;
             background: #fff1e7;
             color: #ff6a00;
-            border: 1px solid rgba(255,106,0,0.20);
+            border: 1px solid rgba(255,106,0,0.22);
             border-radius: 999px;
             padding: 6px 10px;
             font-size: 0.74rem;
@@ -748,19 +728,42 @@ st.markdown(
             margin-bottom: 10px;
         }
 
-        .brand-helper-card strong {
+        .brand-step-title {
+            color: #1f2833;
+            font-size: 1.45rem;
+            line-height: 1.05;
+            font-weight: 900;
+            letter-spacing: -0.04em;
+            margin-bottom: 6px;
+        }
+
+        .brand-step-copy {
+            color: #5d6670;
+            font-size: 0.95rem;
+            line-height: 1.45;
+            font-weight: 650;
+        }
+
+        .brand-step-helper {
+            background: #ffffff;
+            border: 1px solid #ded8d0;
+            border-radius: 20px;
+            padding: 18px 20px;
+            box-shadow: 0 12px 30px rgba(17,24,39,0.07);
+        }
+
+        .brand-step-helper strong {
             display: block;
             color: #1f2833;
             font-weight: 900;
-            margin-bottom: 7px;
+            margin-bottom: 6px;
             font-size: 1rem;
-            letter-spacing: -0.02em;
         }
 
-        .brand-helper-card span {
+        .brand-step-helper span {
             display: block;
             color: #5d6670;
-            font-size: 0.93rem;
+            font-size: 0.92rem;
             line-height: 1.5;
             font-weight: 650;
         }
@@ -943,19 +946,19 @@ st.markdown(
 
         div[data-testid="stTextInput"] label {
             font-weight: 900 !important;
-            color: #ffffff !important;
+            color: #1f2833 !important;
             margin-bottom: 0.45rem !important;
         }
 
         .stTextInput input {
             border-radius: 18px !important;
-            border: 1px solid rgba(255,255,255,0.12) !important;
-            min-height: 60px !important;
-            padding-left: 20px !important;
-            font-size: 1.02rem !important;
+            border: 1px solid #d9d3ca !important;
+            min-height: 58px !important;
+            padding-left: 18px !important;
+            font-size: 1rem !important;
             background: #ffffff !important;
             color: #1f2833 !important;
-            box-shadow: 0 16px 38px rgba(17,24,39,0.18) !important;
+            box-shadow: 0 10px 26px rgba(17,24,39,0.08) !important;
         }
 
         .stTextInput input::placeholder {
@@ -964,7 +967,7 @@ st.markdown(
 
         .stTextInput input:focus {
             border-color: #ff6a00 !important;
-            box-shadow: 0 0 0 4px rgba(255, 106, 0, 0.22), 0 16px 38px rgba(17,24,39,0.18) !important;
+            box-shadow: 0 0 0 4px rgba(255,106,0,0.14), 0 10px 26px rgba(17,24,39,0.08) !important;
         }
 
         [data-testid="stFileUploader"] {
@@ -1103,7 +1106,7 @@ st.markdown(
                 padding-bottom: 34px;
             }
 
-            .hero-badge-row {
+            .hero-banner-wrap {
                 display: none;
             }
 
@@ -1113,6 +1116,10 @@ st.markdown(
 
             .brand-title {
                 font-size: 3.1rem;
+            }
+
+            .brand-step-header {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -1179,17 +1186,23 @@ Use matching date ranges where possible. The Sponsored Brands report helps popul
 logo_path = load_logo_path()
 logo_src = image_to_base64_src(logo_path)
 
+banner_path = load_banner_path()
+banner_src = image_to_base64_src(banner_path)
+
 logo_html = ""
 if logo_src:
     logo_html = f'<img src="{logo_src}" class="hero-logo" alt="Evolved Commerce logo">'
+
+banner_html = ""
+if banner_src:
+    banner_html = f'<img src="{banner_src}" class="hero-banner-logo" alt="Evolved Commerce">'
 
 hero_html = (
     '<div class="site-hero">'
         '<div class="site-hero-top">'
             f'{logo_html}'
-            '<div class="hero-badge-row">'
-                '<span class="hero-status-badge">Free Audit Tool</span>'
-                '<span class="hero-status-badge">Amazon Ads Review</span>'
+            '<div class="hero-banner-wrap">'
+                f'{banner_html}'
             '</div>'
         '</div>'
         '<div class="site-hero-content">'
@@ -1270,41 +1283,35 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-brand_col, helper_col = st.columns([1.45, 1], gap="large")
-
-with brand_col:
-    st.markdown(
-        """
-        <div class="brand-field-intro">
-            <div class="brand-field-eyebrow">Step 1</div>
-            <div class="brand-field-title">Enter your Amazon brand name</div>
-            <div class="brand-field-copy">This name will be used in your audit preview and final report.</div>
+st.markdown(
+    """
+    <div class="brand-step-panel">
+        <div class="brand-step-header">
+            <div>
+                <div class="brand-step-eyebrow">Step 1</div>
+                <div class="brand-step-title">Enter your Amazon brand name</div>
+                <div class="brand-step-copy">
+                    This name will be used in your audit preview and final report.
+                </div>
+            </div>
+            <div class="brand-step-helper">
+                <strong>Then upload your reports</strong>
+                <span>
+                    Once the five required files are added, the audit button will unlock and generate your preview.
+                </span>
+            </div>
         </div>
-        """,
-        unsafe_allow_html=True,
-    )
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
 
-    brand_name_input = st.text_input(
-        "Amazon Brand Name",
-        value=st.session_state.get("lead_brand_name", ""),
-        placeholder="Example: Acme Naturals",
-        key="sales_audit_brand_name",
-        label_visibility="collapsed",
-    )
-
-with helper_col:
-    st.markdown(
-        """
-        <div class="brand-helper-card">
-            <div class="helper-step">Step 2</div>
-            <strong>Upload the five required reports</strong>
-            <span>
-                Once the required files are added, the audit button will unlock and generate your preview.
-            </span>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+brand_name_input = st.text_input(
+    "Amazon Brand Name",
+    value=st.session_state.get("lead_brand_name", ""),
+    placeholder="Example: Acme Naturals",
+    key="sales_audit_brand_name",
+)
 
 st.markdown("#### Required Reports")
 u1, u2 = st.columns(2, gap="large")
