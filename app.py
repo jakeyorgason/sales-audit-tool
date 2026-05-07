@@ -438,22 +438,21 @@ st.markdown(
             display: block;
         }
 
-        .hero-nav {
+        .hero-badge-row {
             display: flex;
             align-items: center;
-            gap: 24px;
-            color: #202833;
-            font-size: 0.94rem;
-            font-weight: 700;
+            gap: 10px;
         }
 
-        .nav-cta {
-            background: var(--ec-orange);
-            color: #ffffff;
-            padding: 11px 18px;
+        .hero-status-badge {
+            background: rgba(255,255,255,0.55);
+            color: #1f2833;
+            border: 1px solid rgba(31,40,51,0.12);
             border-radius: 999px;
+            padding: 9px 13px;
+            font-size: 0.82rem;
             font-weight: 900;
-            box-shadow: 0 12px 28px rgba(255, 106, 0, 0.25);
+            letter-spacing: 0.01em;
         }
 
         .site-hero-content {
@@ -509,30 +508,20 @@ st.markdown(
             font-weight: 600;
         }
 
-        .hero-button-row {
+        .hero-proof-row {
             display: flex;
             flex-wrap: wrap;
-            gap: 12px;
+            gap: 9px;
             margin-top: 26px;
         }
 
-        .hero-primary-pill {
-            background: var(--ec-orange);
+        .hero-proof-item {
+            background: rgba(31,40,51,0.92);
             color: #ffffff;
             border-radius: 999px;
-            padding: 13px 22px;
-            font-size: 0.94rem;
-            font-weight: 900;
-            box-shadow: 0 14px 32px rgba(255, 106, 0, 0.28);
-        }
-
-        .hero-secondary-pill {
-            background: var(--ec-black);
-            color: #ffffff;
-            border-radius: 999px;
-            padding: 13px 18px;
-            font-size: 0.9rem;
-            font-weight: 800;
+            padding: 10px 13px;
+            font-size: 0.82rem;
+            font-weight: 850;
         }
 
         .site-hero-visual {
@@ -698,46 +687,82 @@ st.markdown(
             font-weight: 800;
         }
 
-        .brand-row-shell {
-            background: rgba(255,255,255,0.06);
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 26px;
-            padding: 22px 24px;
-            margin: 1.25rem 0 1.2rem 0;
-            box-shadow: 0 18px 48px rgba(17,24,39,0.16);
+        .brand-field-intro {
+            margin-top: 1.15rem;
+            margin-bottom: 0.75rem;
         }
-        
+
+        .brand-field-eyebrow {
+            display: inline-flex;
+            align-items: center;
+            background: rgba(255,106,0,0.14);
+            color: #ff6a00;
+            border: 1px solid rgba(255,106,0,0.24);
+            border-radius: 999px;
+            padding: 6px 10px;
+            font-size: 0.74rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 10px;
+        }
+
+        .brand-field-title {
+            color: #ffffff;
+            font-size: 1.32rem;
+            line-height: 1.05;
+            font-weight: 900;
+            letter-spacing: -0.035em;
+            margin-bottom: 5px;
+        }
+
+        .brand-field-copy {
+            color: rgba(255,255,255,0.68);
+            font-size: 0.94rem;
+            line-height: 1.45;
+            font-weight: 650;
+        }
+
         .brand-helper-card {
             background: #ffffff;
             border: 1px solid #ded8d0;
-            border-radius: 20px;
-            padding: 18px 20px;
-            min-height: 112px;
-            box-shadow: 0 14px 34px rgba(17,24,39,0.08);
+            border-radius: 22px;
+            padding: 20px 22px;
+            margin-top: 1.15rem;
+            min-height: 142px;
+            box-shadow: 0 18px 42px rgba(17,24,39,0.12);
         }
-        
+
+        .helper-step {
+            display: inline-flex;
+            align-items: center;
+            background: #fff1e7;
+            color: #ff6a00;
+            border: 1px solid rgba(255,106,0,0.20);
+            border-radius: 999px;
+            padding: 6px 10px;
+            font-size: 0.74rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 10px;
+        }
+
         .brand-helper-card strong {
             display: block;
             color: #1f2833;
             font-weight: 900;
-            margin-bottom: 6px;
-            font-size: 0.98rem;
+            margin-bottom: 7px;
+            font-size: 1rem;
+            letter-spacing: -0.02em;
         }
-        
+
         .brand-helper-card span {
             display: block;
             color: #5d6670;
-            font-size: 0.92rem;
+            font-size: 0.93rem;
             line-height: 1.5;
-            font-weight: 600;
-        }
-        
-        .brand-input-note {
-            color: rgba(255,255,255,0.68);
-            font-size: 0.9rem;
-            font-weight: 700;
-            margin-top: -0.15rem;
-            margin-bottom: 0.65rem;
+            font-weight: 650;
         }
 
         .section-title {
@@ -921,21 +946,25 @@ st.markdown(
             color: #ffffff !important;
             margin-bottom: 0.45rem !important;
         }
-        
+
         .stTextInput input {
-            border-radius: 999px !important;
-            border: 1px solid rgba(255,255,255,0.16) !important;
-            min-height: 56px !important;
+            border-radius: 18px !important;
+            border: 1px solid rgba(255,255,255,0.12) !important;
+            min-height: 60px !important;
             padding-left: 20px !important;
-            font-size: 1rem !important;
+            font-size: 1.02rem !important;
             background: #ffffff !important;
             color: #1f2833 !important;
-            box-shadow: 0 12px 30px rgba(17,24,39,0.16) !important;
+            box-shadow: 0 16px 38px rgba(17,24,39,0.18) !important;
         }
-        
+
+        .stTextInput input::placeholder {
+            color: #9ca3af !important;
+        }
+
         .stTextInput input:focus {
             border-color: #ff6a00 !important;
-            box-shadow: 0 0 0 4px rgba(255, 106, 0, 0.22) !important;
+            box-shadow: 0 0 0 4px rgba(255, 106, 0, 0.22), 0 16px 38px rgba(17,24,39,0.18) !important;
         }
 
         [data-testid="stFileUploader"] {
@@ -1074,7 +1103,7 @@ st.markdown(
                 padding-bottom: 34px;
             }
 
-            .hero-nav {
+            .hero-badge-row {
                 display: none;
             }
 
@@ -1158,10 +1187,9 @@ hero_html = (
     '<div class="site-hero">'
         '<div class="site-hero-top">'
             f'{logo_html}'
-            '<div class="hero-nav">'
-                '<span>Amazon Ads Audit</span>'
-                '<span>Growth Insights</span>'
-                '<span class="nav-cta">Free Report</span>'
+            '<div class="hero-badge-row">'
+                '<span class="hero-status-badge">Free Audit Tool</span>'
+                '<span class="hero-status-badge">Amazon Ads Review</span>'
             '</div>'
         '</div>'
         '<div class="site-hero-content">'
@@ -1175,9 +1203,10 @@ hero_html = (
                     'Upload your recent Amazon reports and uncover wasted spend, campaign inefficiencies, '
                     'winning search terms, and growth opportunities your brand can act on.'
                 '</div>'
-                '<div class="hero-button-row">'
-                    '<span class="hero-primary-pill">Generate Free Audit</span>'
-                    '<span class="hero-secondary-pill">Amazon Ads Growth Review</span>'
+                '<div class="hero-proof-row">'
+                    '<span class="hero-proof-item">Wasted spend review</span>'
+                    '<span class="hero-proof-item">Campaign health snapshot</span>'
+                    '<span class="hero-proof-item">Search term opportunities</span>'
                 '</div>'
             '</div>'
             '<div class="site-hero-visual">'
@@ -1241,36 +1270,41 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-st.markdown('<div class="brand-row-shell">', unsafe_allow_html=True)
+brand_col, helper_col = st.columns([1.45, 1], gap="large")
 
-brand_left, brand_right = st.columns([1.35, 1], gap="large")
-
-with brand_left:
-    st.markdown(
-        '<div class="brand-input-note">Step 1: Tell us which Amazon brand we are auditing.</div>',
-        unsafe_allow_html=True,
-    )
-    brand_name_input = st.text_input(
-        "Brand Name",
-        value=st.session_state.get("lead_brand_name", ""),
-        placeholder="Enter your Amazon brand name",
-        key="sales_audit_brand_name",
-    )
-
-with brand_right:
+with brand_col:
     st.markdown(
         """
-        <div class="brand-helper-card">
-            <strong>Then upload your reports</strong>
-            <span>
-                Once the five required files are added, the audit button will unlock and generate your preview.
-            </span>
+        <div class="brand-field-intro">
+            <div class="brand-field-eyebrow">Step 1</div>
+            <div class="brand-field-title">Enter your Amazon brand name</div>
+            <div class="brand-field-copy">This name will be used in your audit preview and final report.</div>
         </div>
         """,
         unsafe_allow_html=True,
     )
 
-st.markdown("</div>", unsafe_allow_html=True)
+    brand_name_input = st.text_input(
+        "Amazon Brand Name",
+        value=st.session_state.get("lead_brand_name", ""),
+        placeholder="Example: Acme Naturals",
+        key="sales_audit_brand_name",
+        label_visibility="collapsed",
+    )
+
+with helper_col:
+    st.markdown(
+        """
+        <div class="brand-helper-card">
+            <div class="helper-step">Step 2</div>
+            <strong>Upload the five required reports</strong>
+            <span>
+                Once the required files are added, the audit button will unlock and generate your preview.
+            </span>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
 st.markdown("#### Required Reports")
 u1, u2 = st.columns(2, gap="large")
