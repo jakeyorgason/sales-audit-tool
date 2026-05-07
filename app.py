@@ -1336,7 +1336,7 @@ st.markdown(
 brand_name_input = st.text_input(
     "Amazon Brand Name",
     value=st.session_state.get("lead_brand_name", ""),
-    placeholder="Example: Acme Naturals",
+    placeholder="Example: Evolved Commerce",
     key="sales_audit_brand_name",
     label_visibility="collapsed",
 )
