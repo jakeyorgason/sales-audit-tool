@@ -698,37 +698,46 @@ st.markdown(
             font-weight: 800;
         }
 
-        .brand-entry-card {
+        .brand-row-shell {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 26px;
+            padding: 22px 24px;
+            margin: 1.25rem 0 1.2rem 0;
+            box-shadow: 0 18px 48px rgba(17,24,39,0.16);
+        }
+        
+        .brand-helper-card {
             background: #ffffff;
             border: 1px solid #ded8d0;
-            border-radius: 24px;
-            padding: 20px 22px;
-            margin-bottom: 1rem;
-            box-shadow: 0 14px 38px rgba(17,17,17,0.07);
-        }
-
-        .brand-helper-card {
-            background: #1f2833;
-            border: 1px solid rgba(255,255,255,0.08);
             border-radius: 20px;
             padding: 18px 20px;
-            margin-top: 0;
-            box-shadow: 0 14px 34px rgba(17,24,39,0.18);
+            min-height: 112px;
+            box-shadow: 0 14px 34px rgba(17,24,39,0.08);
         }
-
+        
         .brand-helper-card strong {
             display: block;
-            color: #ffffff;
+            color: #1f2833;
             font-weight: 900;
-            margin-bottom: 5px;
+            margin-bottom: 6px;
+            font-size: 0.98rem;
         }
-
+        
         .brand-helper-card span {
             display: block;
-            color: rgba(255,255,255,0.76);
+            color: #5d6670;
             font-size: 0.92rem;
-            line-height: 1.45;
+            line-height: 1.5;
             font-weight: 600;
+        }
+        
+        .brand-input-note {
+            color: rgba(255,255,255,0.68);
+            font-size: 0.9rem;
+            font-weight: 700;
+            margin-top: -0.15rem;
+            margin-bottom: 0.65rem;
         }
 
         .section-title {
@@ -909,23 +918,24 @@ st.markdown(
 
         div[data-testid="stTextInput"] label {
             font-weight: 900 !important;
-            color: #1f2833 !important;
+            color: #ffffff !important;
             margin-bottom: 0.45rem !important;
         }
-
+        
         .stTextInput input {
-            border-radius: 16px !important;
-            border: 1px solid #d9d3ca !important;
-            min-height: 54px !important;
-            padding-left: 17px !important;
+            border-radius: 999px !important;
+            border: 1px solid rgba(255,255,255,0.16) !important;
+            min-height: 56px !important;
+            padding-left: 20px !important;
             font-size: 1rem !important;
             background: #ffffff !important;
             color: #1f2833 !important;
+            box-shadow: 0 12px 30px rgba(17,24,39,0.16) !important;
         }
-
+        
         .stTextInput input:focus {
             border-color: #ff6a00 !important;
-            box-shadow: 0 0 0 4px rgba(255, 106, 0, 0.14) !important;
+            box-shadow: 0 0 0 4px rgba(255, 106, 0, 0.22) !important;
         }
 
         [data-testid="stFileUploader"] {
@@ -1231,31 +1241,36 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-brand_left, brand_right = st.columns([1.25, 1], gap="large")
+st.markdown('<div class="brand-row-shell">', unsafe_allow_html=True)
+
+brand_left, brand_right = st.columns([1.35, 1], gap="large")
 
 with brand_left:
-    st.markdown('<div class="brand-entry-card">', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="brand-input-note">Step 1: Tell us which Amazon brand we are auditing.</div>',
+        unsafe_allow_html=True,
+    )
     brand_name_input = st.text_input(
         "Brand Name",
         value=st.session_state.get("lead_brand_name", ""),
         placeholder="Enter your Amazon brand name",
         key="sales_audit_brand_name",
     )
-    st.markdown("</div>", unsafe_allow_html=True)
 
 with brand_right:
     st.markdown(
         """
         <div class="brand-helper-card">
-            <strong>What happens next?</strong>
+            <strong>Then upload your reports</strong>
             <span>
-                Upload the required reports, generate a preview, then unlock a personalized Google Sheets audit
-                you can share with your team.
+                Once the five required files are added, the audit button will unlock and generate your preview.
             </span>
         </div>
         """,
         unsafe_allow_html=True,
     )
+
+st.markdown("</div>", unsafe_allow_html=True)
 
 st.markdown("#### Required Reports")
 u1, u2 = st.columns(2, gap="large")
