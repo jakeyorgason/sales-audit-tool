@@ -1263,7 +1263,7 @@ hero_html = (
                     '<span>Surface the search terms driving sales.</span>'
                 '</div>'
                 '<div class="partner-badge">'
-                    'amazon ads<br><strong>audit ready</strong>'
+                    'Amazon Ads<br><strong>Audit Rready</strong>'
                 '</div>'
             '</div>'
         '</div>'
