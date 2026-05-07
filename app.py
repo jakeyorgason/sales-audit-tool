@@ -706,14 +706,16 @@ st.markdown(
 
         .brand-entry-left,
         .brand-entry-right {
-            background: rgba(255,255,255,0.56);
+            background: #ffffff;
             border: 1px solid rgba(222,216,208,0.95);
             border-radius: 22px;
             padding: 22px 24px;
+            box-shadow: 0 10px 26px rgba(17,24,39,0.04);
         }
 
+        .brand-entry-left,
         .brand-entry-right {
-            background: #ffffff;
+            min-geight: 150px;
         }
 
         .brand-step-eyebrow {
