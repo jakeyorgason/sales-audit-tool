@@ -710,12 +710,8 @@ st.markdown(
             border: 1px solid rgba(222,216,208,0.95);
             border-radius: 22px;
             padding: 22px 24px;
+            min-height: 150px;
             box-shadow: 0 10px 26px rgba(17,24,39,0.04);
-        }
-
-        .brand-entry-left,
-        .brand-entry-right {
-            min-geight: 150px;
         }
 
         .brand-step-eyebrow {
@@ -961,12 +957,11 @@ st.markdown(
             box-shadow: 0 0 0 4px rgba(255,106,0,0.16), 0 10px 26px rgba(17,24,39,0.08) !important;
         }
 
-        /* The Amazon brand input */
         div[data-testid="stTextInput"]:has(input[aria-label="Amazon Brand Name"]) {
             margin-top: 0 !important;
             margin-bottom: 1.5rem !important;
         }
-        
+
         div[data-testid="stTextInput"]:has(input[aria-label="Amazon Brand Name"]) > div {
             min-height: 50px !important;
         }
@@ -976,15 +971,12 @@ st.markdown(
             color: #1f2833 !important;
             border: 2px solid rgba(255,106,0,0.60) !important;
             border-radius: 16px !important;
-        
             min-height: 48px !important;
             height: 48px !important;
-        
             padding: 0 20px !important;
             font-size: 1rem !important;
             font-weight: 750 !important;
             line-height: 48px !important;
-        
             box-shadow: 0 10px 24px rgba(0,0,0,0.14) !important;
             overflow: visible !important;
         }
@@ -997,7 +989,7 @@ st.markdown(
 
         div[data-testid="stTextInput"]:has(input[aria-label="Amazon Brand Name"]) input:focus {
             border-color: #ff6a00 !important;
-            box-shadow: 0 0 0 4px rgba(255,106,0,0.22), 0 14px 34px rgba(0,0,0,0.16) !important;
+            box-shadow: 0 0 0 4px rgba(255,106,0,0.22), 0 10px 24px rgba(0,0,0,0.14) !important;
         }
 
         [data-testid="stFileUploader"] {
@@ -1093,23 +1085,38 @@ st.markdown(
         }
 
         div[data-testid="stDataFrame"] {
-            border: 1px solid var(--ec-border);
-            border-radius: 18px;
-            overflow: hidden;
-            box-shadow: 0 12px 34px rgba(17,17,17,0.06);
+            background: #ffffff !important;
+            border: 1px solid rgba(222,216,208,0.95) !important;
+            border-radius: 18px !important;
+            overflow: hidden !important;
+            box-shadow: 0 16px 36px rgba(0,0,0,0.16) !important;
+        }
+
+        div[data-testid="stDataFrame"] * {
+            color: #1f2833 !important;
         }
 
         div[data-testid="stExpander"] {
-            background: rgba(255,255,255,0.92);
-            border: 1px solid var(--ec-border);
-            border-radius: 18px;
+            background: #ffffff !important;
+            border: 1px solid #ded8d0 !important;
+            border-radius: 18px !important;
             box-shadow: 0 10px 28px rgba(17,17,17,0.05);
             overflow: hidden;
         }
 
+        div[data-testid="stExpander"] * {
+            color: #1f2833 !important;
+        }
+
         div[data-testid="stAlert"] {
+            background: #ffffff !important;
+            color: #1f2833 !important;
             border-radius: 16px;
             border: 1px solid var(--ec-border);
+        }
+
+        div[data-testid="stAlert"] * {
+            color: #1f2833 !important;
         }
 
         hr {
@@ -1120,6 +1127,105 @@ st.markdown(
         a {
             color: var(--ec-orange-dark);
             font-weight: 800;
+        }
+
+        /* =========================================================
+           RESULTS AREA FIXES
+           ========================================================= */
+
+        .main .block-container h1,
+        .main .block-container h2,
+        .main .block-container h3,
+        .main .block-container h4,
+        .main .block-container h5,
+        .main .block-container h6,
+        .main .block-container p,
+        .main .block-container li,
+        .main .block-container label {
+            color: #ffffff;
+        }
+
+        .summary-box,
+        .summary-box *,
+        .metric-card,
+        .metric-card *,
+        .trust-card,
+        .trust-card *,
+        .audit-form-card,
+        .audit-form-card *,
+        .brand-entry-card,
+        .brand-entry-card *,
+        .upload-note,
+        .upload-note * {
+            color: #1f2833 !important;
+        }
+
+        .section-title {
+            color: #ffffff !important;
+        }
+
+        .summary-box {
+            background: #ffffff !important;
+            color: #1f2833 !important;
+        }
+
+        .summary-box strong {
+            color: #1f2833 !important;
+        }
+
+        .metric-label {
+            color: #5d6670 !important;
+        }
+
+        .metric-value {
+            color: #1f2833 !important;
+        }
+
+        .lead-card,
+        .lead-card * {
+            color: #ffffff !important;
+        }
+
+        div[data-testid="stTextInput"]:has(input[aria-label="Full Name"]) label,
+        div[data-testid="stTextInput"]:has(input[aria-label="Phone Number"]) label,
+        div[data-testid="stTextInput"]:has(input[aria-label="Work Email"]) label,
+        div[data-testid="stTextInput"]:has(input[aria-label="Brand Name"]) label {
+            color: #ffffff !important;
+            font-weight: 850 !important;
+        }
+
+        div[data-testid="stTextInput"]:has(input[aria-label="Full Name"]) input,
+        div[data-testid="stTextInput"]:has(input[aria-label="Phone Number"]) input,
+        div[data-testid="stTextInput"]:has(input[aria-label="Work Email"]) input,
+        div[data-testid="stTextInput"]:has(input[aria-label="Brand Name"]) input {
+            background: #ffffff !important;
+            color: #1f2833 !important;
+            border: 2px solid rgba(255,106,0,0.40) !important;
+            border-radius: 16px !important;
+            min-height: 52px !important;
+            height: 52px !important;
+            padding: 0 18px !important;
+            font-size: 1rem !important;
+            font-weight: 700 !important;
+            line-height: 52px !important;
+            box-shadow: 0 12px 26px rgba(0,0,0,0.14) !important;
+        }
+
+        div[data-testid="stTextInput"]:has(input[aria-label="Full Name"]) input::placeholder,
+        div[data-testid="stTextInput"]:has(input[aria-label="Phone Number"]) input::placeholder,
+        div[data-testid="stTextInput"]:has(input[aria-label="Work Email"]) input::placeholder,
+        div[data-testid="stTextInput"]:has(input[aria-label="Brand Name"]) input::placeholder {
+            color: #6b7280 !important;
+            opacity: 1 !important;
+        }
+
+        .main .block-container strong {
+            color: #ffffff;
+        }
+
+        button[kind="secondary"],
+        .stButton > button {
+            color: #ffffff !important;
         }
 
         @media (max-width: 1000px) {
@@ -1263,7 +1369,7 @@ hero_html = (
                     '<span>Surface the search terms driving sales.</span>'
                 '</div>'
                 '<div class="partner-badge">'
-                    'Amazon Ads<br><strong>Audit Rready</strong>'
+                    'amazon ads<br><strong>audit ready</strong>'
                 '</div>'
             '</div>'
         '</div>'
@@ -1336,7 +1442,7 @@ st.markdown(
 brand_name_input = st.text_input(
     "Amazon Brand Name",
     value=st.session_state.get("lead_brand_name", ""),
-    placeholder="Example: Evolved Commerce",
+    placeholder="Example: Acme Naturals",
     key="sales_audit_brand_name",
     label_visibility="collapsed",
 )
@@ -1645,12 +1751,18 @@ if results:
         )
 
     st.markdown("---")
-    st.markdown("### Quick Overview")
+    st.markdown(
+        '<div class="dark-section-heading">Quick Overview</div>',
+        unsafe_allow_html=True,
+    )
 
     overview_left, overview_right = st.columns(2)
 
     with overview_left:
-        st.markdown("**Top Keywords / Targets**")
+        st.markdown(
+            '<div style="color:#ffffff;font-weight:900;margin-bottom:0.55rem;">Top Keywords / Targets</div>',
+            unsafe_allow_html=True,
+        )
         top_kw_brief = top_kw.head(5).copy()
         if not top_kw_brief.empty:
             st.dataframe(top_kw_brief, use_container_width=True, hide_index=True)
@@ -1658,7 +1770,10 @@ if results:
             st.info("No top keyword data available.")
 
     with overview_right:
-        st.markdown("**Biggest Waste**")
+        st.markdown(
+            '<div style="color:#ffffff;font-weight:900;margin-bottom:0.55rem;">Biggest Waste</div>',
+            unsafe_allow_html=True,
+        )
         waste_brief = pd.concat([waste_kw_sheet, waste_st_sheet], ignore_index=True).drop_duplicates()
         if not waste_brief.empty:
             waste_brief = waste_brief.sort_values("spend", ascending=False).head(5)
