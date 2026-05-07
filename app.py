@@ -964,19 +964,26 @@ st.markdown(
             margin-top: 0 !important;
             margin-bottom: 1.5rem !important;
         }
+        
+        div[data-testid="stTextInput"]:has(input[aria-label="Amazon Brand Name"]) > div {
+            min-height: 50px !important;
+        }
 
         div[data-testid="stTextInput"]:has(input[aria-label="Amazon Brand Name"]) input {
             background: #ffffff !important;
             color: #1f2833 !important;
             border: 2px solid rgba(255,106,0,0.60) !important;
-            border-radius: 18px !important;
-            min-height: 66px !important;
-            height: 66px !important;
-            padding: 0 22px !important;
-            font-size: 1.08rem !important;
+            border-radius: 16px !important;
+        
+            min-height: 48px !important;
+            height: 48px !important;
+        
+            padding: 0 20px !important;
+            font-size: 1rem !important;
             font-weight: 750 !important;
-            line-height: 66px !important;
-            box-shadow: 0 14px 34px rgba(0,0,0,0.16) !important;
+            line-height: 48px !important;
+        
+            box-shadow: 0 10px 24px rgba(0,0,0,0.14) !important;
             overflow: visible !important;
         }
 
