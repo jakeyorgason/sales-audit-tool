@@ -763,6 +763,25 @@ st.markdown(
             font-weight: 650;
         }
 
+        .dark-section-heading {
+            color: #ffffff;
+            font-size: 1.2rem;
+            font-weight: 900;
+            letter-spacing: -0.025em;
+            margin: 1.7rem 0 0.85rem 0;
+        }
+
+        .dark-section-heading:before {
+            content: "";
+            display: inline-block;
+            width: 9px;
+            height: 9px;
+            background: #ff6a00;
+            border-radius: 999px;
+            margin-right: 9px;
+            transform: translateY(-1px);
+        }
+
         .section-title {
             font-size: 1.32rem;
             font-weight: 900;
@@ -941,28 +960,46 @@ st.markdown(
 
         div[data-testid="stTextInput"] label {
             font-weight: 900 !important;
-            color: #1f2833 !important;
+            color: #ffffff !important;
             margin-bottom: 0.45rem !important;
         }
 
         .stTextInput input {
             border-radius: 18px !important;
-            border: 1px solid #d9d3ca !important;
+            border: 1px solid rgba(255,255,255,0.14) !important;
             min-height: 58px !important;
             padding-left: 18px !important;
             font-size: 1rem !important;
-            background: #ffffff !important;
-            color: #1f2833 !important;
-            box-shadow: 0 10px 26px rgba(17,24,39,0.08) !important;
+            background: rgba(255,255,255,0.08) !important;
+            color: #ffffff !important;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 10px 26px rgba(0,0,0,0.12) !important;
         }
 
         .stTextInput input::placeholder {
-            color: #9ca3af !important;
+            color: rgba(255,255,255,0.55) !important;
         }
 
         .stTextInput input:focus {
+            background: rgba(255,255,255,0.12) !important;
             border-color: #ff6a00 !important;
-            box-shadow: 0 0 0 4px rgba(255,106,0,0.14), 0 10px 26px rgba(17,24,39,0.08) !important;
+            box-shadow: 0 0 0 4px rgba(255,106,0,0.18), 0 10px 26px rgba(0,0,0,0.14) !important;
+        }
+
+        div[data-testid="stTextInput"]:has(input[aria-label="Full Name"]) input,
+        div[data-testid="stTextInput"]:has(input[aria-label="Phone Number"]) input,
+        div[data-testid="stTextInput"]:has(input[aria-label="Work Email"]) input,
+        div[data-testid="stTextInput"]:has(input[aria-label="Brand Name"]) input {
+            background: #ffffff !important;
+            color: #1f2833 !important;
+            border: 1px solid #d9d3ca !important;
+            box-shadow: 0 10px 26px rgba(17,24,39,0.08) !important;
+        }
+
+        div[data-testid="stTextInput"]:has(input[aria-label="Full Name"]) label,
+        div[data-testid="stTextInput"]:has(input[aria-label="Phone Number"]) label,
+        div[data-testid="stTextInput"]:has(input[aria-label="Work Email"]) label,
+        div[data-testid="stTextInput"]:has(input[aria-label="Brand Name"]) label {
+            color: #1f2833 !important;
         }
 
         [data-testid="stFileUploader"] {
@@ -1312,7 +1349,11 @@ with brand_right:
         unsafe_allow_html=True,
     )
 
-st.markdown("#### Required Reports")
+st.markdown(
+    '<div class="dark-section-heading">Required Reports</div>',
+    unsafe_allow_html=True,
+)
+
 u1, u2 = st.columns(2, gap="large")
 u3, u4 = st.columns(2, gap="large")
 u5, u6 = st.columns(2, gap="large")
