@@ -14,7 +14,7 @@ from sales_audit_ingestion import SalesAuditEngine
 # =========================================================
 st.set_page_config(
     page_title="Free Amazon Ads Audit | Evolved Commerce",
-    page_icon="assets/ec_logo2.jpg",  # browser tab icon
+    page_icon="assets/ec_logo2.jpg",
     layout="wide",
 )
 
@@ -59,7 +59,7 @@ def get_number(value: Any, default: float = 0.0) -> float:
 
 def load_logo_path() -> Optional[str]:
     possible_paths = [
-        "assets/ec_logo.png",  # transparent logo for the app hero
+        "assets/ec_logo.png",
         "assets/ec_logo.jpg",
         "assets/ec_logo.jpeg",
         "assets/logo.png",
@@ -696,21 +696,13 @@ st.markdown(
             font-weight: 800;
         }
 
-        .brand-step-panel {
+        .brand-step-panel-inner {
             background: #f4f1ec;
             border: 1px solid #ded8d0;
             border-radius: 26px;
             padding: 24px 26px 28px 26px;
             margin: 1.25rem 0 1.35rem 0;
             box-shadow: 0 18px 48px rgba(17,24,39,0.16);
-        }
-
-        .brand-step-header {
-            display: grid;
-            grid-template-columns: 1.35fr 1fr;
-            gap: 28px;
-            align-items: start;
-            margin-bottom: 16px;
         }
 
         .brand-step-eyebrow {
@@ -742,6 +734,7 @@ st.markdown(
             font-size: 0.95rem;
             line-height: 1.45;
             font-weight: 650;
+            margin-bottom: 14px;
         }
 
         .brand-step-helper {
@@ -1117,10 +1110,6 @@ st.markdown(
             .brand-title {
                 font-size: 3.1rem;
             }
-
-            .brand-step-header {
-                grid-template-columns: 1fr;
-            }
         }
     </style>
     """,
@@ -1283,35 +1272,46 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-st.markdown(
-    """
-    <div class="brand-step-panel">
-        <div class="brand-step-header">
-            <div>
-                <div class="brand-step-eyebrow">Step 1</div>
-                <div class="brand-step-title">Enter your Amazon brand name</div>
-                <div class="brand-step-copy">
-                    This name will be used in your audit preview and final report.
-                </div>
+brand_box = st.container()
+with brand_box:
+    st.markdown('<div class="brand-step-panel-inner">', unsafe_allow_html=True)
+
+    brand_left, brand_right = st.columns([1.35, 1], gap="large")
+
+    with brand_left:
+        st.markdown(
+            """
+            <div class="brand-step-eyebrow">Step 1</div>
+            <div class="brand-step-title">Enter your Amazon brand name</div>
+            <div class="brand-step-copy">
+                This name will be used in your audit preview and final report.
             </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        brand_name_input = st.text_input(
+            "Amazon Brand Name",
+            value=st.session_state.get("lead_brand_name", ""),
+            placeholder="Example: Acme Naturals",
+            key="sales_audit_brand_name",
+            label_visibility="collapsed",
+        )
+
+    with brand_right:
+        st.markdown(
+            """
             <div class="brand-step-helper">
                 <strong>Then upload your reports</strong>
                 <span>
                     Once the five required files are added, the audit button will unlock and generate your preview.
                 </span>
             </div>
-        </div>
-    </div>
-    """,
-    unsafe_allow_html=True,
-)
+            """,
+            unsafe_allow_html=True,
+        )
 
-brand_name_input = st.text_input(
-    "Amazon Brand Name",
-    value=st.session_state.get("lead_brand_name", ""),
-    placeholder="Example: Acme Naturals",
-    key="sales_audit_brand_name",
-)
+    st.markdown("</div>", unsafe_allow_html=True)
 
 st.markdown("#### Required Reports")
 u1, u2 = st.columns(2, gap="large")
