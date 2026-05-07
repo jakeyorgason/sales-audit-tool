@@ -1453,7 +1453,7 @@ hero_html = (
                     '<span>Surface the search terms driving sales.</span>'
                 '</div>'
                 '<div class="partner-badge">'
-                    'amazon ads<br><strong>audit ready</strong>'
+                    'Amazon Ads<br><strong>Audit Ready</strong>'
                 '</div>'
             '</div>'
         '</div>'
@@ -1526,7 +1526,7 @@ st.markdown(
 brand_name_input = st.text_input(
     "Amazon Brand Name",
     value=st.session_state.get("lead_brand_name", ""),
-    placeholder="Example: Acme Naturals",
+    placeholder="Example: Evolved Commerce",
     key="sales_audit_brand_name",
     label_visibility="collapsed",
 )
