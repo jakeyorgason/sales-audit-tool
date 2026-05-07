@@ -506,7 +506,7 @@ st.markdown(
 
         .site-hero-content {
             display: grid;
-            grid-template-columns: 1.05fr 0.95fr;
+            grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
             gap: 24px;
             align-items: center;
             min-height: 440px;
@@ -516,6 +516,7 @@ st.markdown(
 
         .site-hero-copy {
             padding: 38px 0 48px 8px;
+            min-width: 0;
         }
 
         .hero-kicker {
@@ -576,6 +577,7 @@ st.markdown(
         .site-hero-visual {
             position: relative;
             min-height: 395px;
+            min-width: 0;
         }
 
         .orange-shape {
@@ -648,7 +650,7 @@ st.markdown(
 
         .trust-strip {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(3, minmax(0, 1fr));
             gap: 14px;
             margin: 0.4rem 0 1.2rem 0;
         }
@@ -734,7 +736,7 @@ st.markdown(
 
         .brand-entry-card {
             display: grid;
-            grid-template-columns: 1.35fr 1fr;
+            grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
             gap: 24px;
             background: #f4f1ec;
             border: 1px solid #ded8d0;
@@ -967,7 +969,6 @@ st.markdown(
 
         div[data-testid="stTextInput"] {
             max-width: 100%;
-            min-height: 76px !important;
             overflow: visible !important;
         }
 
@@ -978,38 +979,9 @@ st.markdown(
         }
 
         .stTextInput input {
-            border-radius: 18px !important;
-            border: 1px solid #d9d3ca !important;
-            min-height: 54px !important;
-            height: 54px !important;
-            padding: 0 18px !important;
-            font-size: 1rem !important;
             background: #ffffff !important;
             color: #1f2833 !important;
-            box-shadow: 0 10px 26px rgba(17,24,39,0.08) !important;
-            line-height: 54px !important;
-        }
-
-        .stTextInput input::placeholder {
-            color: #6b7280 !important;
-            opacity: 1 !important;
-        }
-
-        .stTextInput input:focus {
-            border-color: #ff6a00 !important;
-            box-shadow: 0 0 0 4px rgba(255,106,0,0.16), 0 10px 26px rgba(17,24,39,0.08) !important;
-        }
-
-        div[data-testid="stTextInput"]:has(input[aria-label="Amazon Brand Name"]) {
-            margin-top: 0 !important;
-            margin-bottom: 1.5rem !important;
-            min-height: 58px !important;
-        }
-
-        div[data-testid="stTextInput"]:has(input[aria-label="Amazon Brand Name"]) input {
-            background: #ffffff !important;
-            color: #1f2833 !important;
-            border: 2px solid rgba(255,106,0,0.60) !important;
+            border: 2px solid rgba(255,106,0,0.40) !important;
             border-radius: 16px !important;
             min-height: 48px !important;
             height: 48px !important;
@@ -1021,15 +993,68 @@ st.markdown(
             overflow: visible !important;
         }
 
+        .stTextInput input::placeholder {
+            color: #6b7280 !important;
+            opacity: 1 !important;
+        }
+
+        .stTextInput input:focus {
+            border-color: #ff6a00 !important;
+            box-shadow: 0 0 0 4px rgba(255,106,0,0.22), 0 10px 24px rgba(0,0,0,0.14) !important;
+        }
+
+        /* Brand-name input before audit */
+        div[data-testid="stTextInput"]:has(input[aria-label="Amazon Brand Name"]) {
+            margin-top: 0 !important;
+            margin-bottom: 1.5rem !important;
+        }
+
+        div[data-testid="stTextInput"]:has(input[aria-label="Amazon Brand Name"]) > div {
+            min-height: 50px !important;
+        }
+
+        div[data-testid="stTextInput"]:has(input[aria-label="Amazon Brand Name"]) input {
+            border-color: rgba(255,106,0,0.60) !important;
+        }
+
         div[data-testid="stTextInput"]:has(input[aria-label="Amazon Brand Name"]) input::placeholder {
             color: #374151 !important;
             opacity: 1 !important;
             font-weight: 700 !important;
         }
 
-        div[data-testid="stTextInput"]:has(input[aria-label="Amazon Brand Name"]) input:focus {
-            border-color: #ff6a00 !important;
-            box-shadow: 0 0 0 4px rgba(255,106,0,0.22), 0 10px 24px rgba(0,0,0,0.14) !important;
+        /* Bottom lead form input wrappers */
+        div[data-testid="stTextInput"]:has(input[aria-label="Full Name"]),
+        div[data-testid="stTextInput"]:has(input[aria-label="Phone Number"]),
+        div[data-testid="stTextInput"]:has(input[aria-label="Work Email"]),
+        div[data-testid="stTextInput"]:has(input[aria-label="Brand Name"]) {
+            margin-top: 0 !important;
+            margin-bottom: 0.95rem !important;
+        }
+
+        div[data-testid="stTextInput"]:has(input[aria-label="Full Name"]) > div,
+        div[data-testid="stTextInput"]:has(input[aria-label="Phone Number"]) > div,
+        div[data-testid="stTextInput"]:has(input[aria-label="Work Email"]) > div,
+        div[data-testid="stTextInput"]:has(input[aria-label="Brand Name"]) > div {
+            min-height: 50px !important;
+        }
+
+        div[data-testid="stTextInput"]:has(input[aria-label="Full Name"]) input,
+        div[data-testid="stTextInput"]:has(input[aria-label="Phone Number"]) input,
+        div[data-testid="stTextInput"]:has(input[aria-label="Work Email"]) input,
+        div[data-testid="stTextInput"]:has(input[aria-label="Brand Name"]) input {
+            background: #ffffff !important;
+            color: #1f2833 !important;
+            border: 2px solid rgba(255,106,0,0.40) !important;
+            border-radius: 16px !important;
+            min-height: 48px !important;
+            height: 48px !important;
+            padding: 0 20px !important;
+            font-size: 1rem !important;
+            font-weight: 750 !important;
+            line-height: 48px !important;
+            box-shadow: 0 10px 24px rgba(0,0,0,0.14) !important;
+            overflow: visible !important;
         }
 
         [data-testid="stFileUploader"] {
@@ -1141,7 +1166,8 @@ st.markdown(
             background: #ffffff;
             border: 1px solid rgba(222,216,208,0.95);
             border-radius: 18px;
-            overflow: hidden;
+            overflow-x: auto;
+            overflow-y: hidden;
             box-shadow: 0 16px 36px rgba(0,0,0,0.16);
             min-height: 170px;
         }
@@ -1154,6 +1180,7 @@ st.markdown(
 
         .overview-table {
             width: 100%;
+            min-width: 520px;
             border-collapse: collapse;
             color: #1f2833;
             font-size: 0.9rem;
@@ -1284,28 +1311,38 @@ st.markdown(
             color: #ffffff !important;
         }
 
-        @media (max-width: 1180px) {
+        @media (max-width: 1320px) {
             .block-container {
                 max-width: 100%;
                 padding-left: 1rem;
                 padding-right: 1rem;
             }
 
+            .site-hero {
+                min-height: auto;
+                padding: 28px;
+            }
+
             .site-hero-content {
                 grid-template-columns: 1fr;
+                min-height: auto;
             }
 
             .site-hero-visual {
                 display: none;
             }
 
-            .site-hero {
-                min-height: auto;
-                padding-bottom: 34px;
-            }
-
             .hero-banner-wrap {
                 display: none;
+            }
+
+            .brand-title {
+                font-size: clamp(2.8rem, 8vw, 4.75rem);
+                max-width: 720px;
+            }
+
+            .brand-subtitle {
+                max-width: 760px;
             }
 
             .trust-strip {
@@ -1315,21 +1352,21 @@ st.markdown(
             .brand-entry-card {
                 grid-template-columns: 1fr;
             }
-
-            .brand-title {
-                font-size: clamp(2.8rem, 9vw, 4.5rem);
-            }
         }
 
-        @media (max-width: 760px) {
+        @media (max-width: 980px) {
             .block-container {
-                padding-left: 0.75rem;
-                padding-right: 0.75rem;
+                padding-left: 0.8rem;
+                padding-right: 0.8rem;
             }
 
             .site-hero {
                 border-radius: 24px;
                 padding: 24px;
+            }
+
+            .site-hero-copy {
+                padding: 22px 0 10px 0;
             }
 
             .audit-form-card,
@@ -1339,8 +1376,14 @@ st.markdown(
                 padding: 22px;
             }
 
+            .brand-entry-left,
+            .brand-entry-right {
+                min-height: auto;
+            }
+
             .brand-title {
                 font-size: 2.65rem;
+                letter-spacing: -0.06em;
             }
 
             .audit-form-title {
@@ -1349,6 +1392,51 @@ st.markdown(
 
             .hero-logo {
                 width: 180px;
+            }
+
+            .hero-proof-row,
+            .required-pill-row {
+                gap: 7px;
+            }
+
+            .hero-proof-item,
+            .required-pill {
+                font-size: 0.74rem;
+                padding: 8px 10px;
+            }
+        }
+
+        @media (max-width: 680px) {
+            .block-container {
+                padding-left: 0.55rem;
+                padding-right: 0.55rem;
+            }
+
+            .site-hero,
+            .audit-form-card,
+            .brand-entry-card,
+            .lead-card {
+                border-radius: 18px;
+                padding: 18px;
+            }
+
+            .brand-title {
+                font-size: 2.25rem;
+            }
+
+            .brand-subtitle,
+            .audit-form-subtitle,
+            .brand-step-copy,
+            .lead-card p {
+                font-size: 0.92rem;
+            }
+
+            .lead-card h2 {
+                font-size: 1.55rem;
+            }
+
+            .stButton > button {
+                width: 100% !important;
             }
         }
     </style>
