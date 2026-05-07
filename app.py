@@ -183,45 +183,6 @@ def simplify_campaign_table(df: pd.DataFrame) -> pd.DataFrame:
     return out.sort_values(["spend", "sales"], ascending=[False, False]).reset_index(drop=True)
 
 
-def render_simple_table(df: pd.DataFrame, empty_message: str) -> None:
-    if df is None or df.empty:
-        st.markdown(
-            f"""
-            <div class="overview-table-card empty">
-                {empty_message}
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-        return
-
-    display_df = df.head(5).copy()
-    columns = list(display_df.columns)
-
-    header_html = "".join([f"<th>{str(col)}</th>" for col in columns])
-    row_html = ""
-
-    for _, row in display_df.iterrows():
-        cells = "".join([f"<td>{str(row.get(col, ''))}</td>" for col in columns])
-        row_html += f"<tr>{cells}</tr>"
-
-    st.markdown(
-        f"""
-        <div class="overview-table-card">
-            <table class="overview-table">
-                <thead>
-                    <tr>{header_html}</tr>
-                </thead>
-                <tbody>
-                    {row_html}
-                </tbody>
-            </table>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-
 def build_sheet_term_table(df: pd.DataFrame, term_col: str) -> pd.DataFrame:
     """
     Build raw numeric rows for the Google Sheet payload.
@@ -926,19 +887,17 @@ st.markdown(
         }
 
         .lead-card {
-            background:
-                radial-gradient(circle at top right, rgba(255,106,0,0.18), transparent 20rem),
-                var(--ec-black);
-            color: #ffffff;
+            background: #f4f1ec;
+            color: #1f2833;
             border-radius: 30px;
             padding: 34px 36px;
-            box-shadow: 0 28px 80px rgba(17,17,17,0.20);
+            box-shadow: 0 26px 80px rgba(17, 24, 39, 0.18);
             margin: 1.5rem 0 1.3rem 0;
-            border: 1px solid rgba(255,255,255,0.08);
+            border: 1px solid rgba(222,216,208,0.95);
         }
 
         .lead-card h2 {
-            color: #ffffff;
+            color: #1f2833;
             font-size: 2rem;
             line-height: 1.03;
             letter-spacing: -0.055em;
@@ -947,17 +906,18 @@ st.markdown(
         }
 
         .lead-card p {
-            color: rgba(255,255,255,0.78);
+            color: #5d6670;
             font-size: 1rem;
             line-height: 1.55;
             margin-bottom: 0;
-            font-weight: 500;
+            font-weight: 650;
         }
 
         .lead-card .mini {
             display: inline-block;
-            color: #ffffff;
-            background: var(--ec-orange);
+            color: #ff6a00;
+            background: #fff1e7;
+            border: 1px solid rgba(255,106,0,0.22);
             border-radius: 999px;
             padding: 7px 12px;
             font-size: 0.76rem;
@@ -1162,57 +1122,6 @@ st.markdown(
             color: #1f2833 !important;
         }
 
-        .overview-table-card {
-            background: #ffffff;
-            border: 1px solid rgba(222,216,208,0.95);
-            border-radius: 18px;
-            overflow-x: auto;
-            overflow-y: hidden;
-            box-shadow: 0 16px 36px rgba(0,0,0,0.16);
-            min-height: 170px;
-        }
-
-        .overview-table-card.empty {
-            color: #1f2833;
-            padding: 22px;
-            font-weight: 800;
-        }
-
-        .overview-table {
-            width: 100%;
-            min-width: 520px;
-            border-collapse: collapse;
-            color: #1f2833;
-            font-size: 0.9rem;
-        }
-
-        .overview-table th {
-            background: #f4f1ec;
-            color: #1f2833;
-            text-align: left;
-            padding: 12px 14px;
-            font-size: 0.78rem;
-            text-transform: uppercase;
-            letter-spacing: 0.04em;
-            font-weight: 900;
-            border-bottom: 1px solid #ded8d0;
-        }
-
-        .overview-table td {
-            color: #1f2833;
-            padding: 13px 14px;
-            border-bottom: 1px solid #ebe7e1;
-            font-weight: 650;
-        }
-
-        .overview-table tr:last-child td {
-            border-bottom: none;
-        }
-
-        .overview-table tr:nth-child(even) td {
-            background: #fbfaf7;
-        }
-
         div[data-testid="stExpander"] {
             background: #ffffff !important;
             border: 1px solid #ded8d0 !important;
@@ -1269,8 +1178,14 @@ st.markdown(
         .brand-entry-card,
         .brand-entry-card *,
         .upload-note,
-        .upload-note * {
+        .upload-note *,
+        .lead-card,
+        .lead-card * {
             color: #1f2833 !important;
+        }
+
+        .lead-card .mini {
+            color: #ff6a00 !important;
         }
 
         .section-title {
@@ -1292,18 +1207,6 @@ st.markdown(
 
         .metric-value {
             color: #1f2833 !important;
-        }
-
-        .lead-card,
-        .lead-card * {
-            color: #ffffff !important;
-        }
-
-        .quick-overview-label {
-            color: #ffffff;
-            font-weight: 900;
-            margin-bottom: 0.55rem;
-            font-size: 0.96rem;
         }
 
         button[kind="secondary"],
@@ -1755,10 +1658,6 @@ if results:
     winner_tables = safe_dict(results.get("winner_tables"))
     narrative = str(results.get("narrative", "")).strip()
 
-    top_kw = simplify_term_table(keyword_spend_table, "target").head(20)
-    top_st = simplify_term_table(search_term_spend_table, "customer_search_term").head(20)
-    campaign_view = simplify_campaign_table(campaign_summary).head(20)
-
     top_kw_sheet = build_sheet_term_table(keyword_spend_table, "target").head(20)
     top_st_sheet = build_sheet_term_table(search_term_spend_table, "customer_search_term").head(20)
 
@@ -1930,38 +1829,6 @@ if results:
             """,
             unsafe_allow_html=True,
         )
-
-    st.markdown("---")
-    st.markdown(
-        '<div class="dark-section-heading">Quick Overview</div>',
-        unsafe_allow_html=True,
-    )
-
-    overview_left, overview_right = st.columns(2)
-
-    with overview_left:
-        st.markdown(
-            '<div class="quick-overview-label">Top Keywords / Targets</div>',
-            unsafe_allow_html=True,
-        )
-        top_kw_brief = top_kw.head(5).copy()
-        render_simple_table(top_kw_brief, "No top keyword data available.")
-
-    with overview_right:
-        st.markdown(
-            '<div class="quick-overview-label">Biggest Waste</div>',
-            unsafe_allow_html=True,
-        )
-        waste_brief = pd.concat([waste_kw_sheet, waste_st_sheet], ignore_index=True).drop_duplicates()
-        if not waste_brief.empty:
-            waste_brief = waste_brief.sort_values("spend", ascending=False).head(5)
-        render_simple_table(waste_brief, "No major waste terms found.")
-
-    with st.expander("Campaign Summary", expanded=False):
-        if not campaign_view.empty:
-            st.dataframe(campaign_view, use_container_width=True, hide_index=True)
-        else:
-            st.info("No campaign summary available.")
 
 else:
     st.info("Upload your reports and click Generate My Free Audit to begin.")
