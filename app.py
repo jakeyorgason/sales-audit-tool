@@ -696,12 +696,12 @@ st.markdown(
             font-weight: 800;
         }
 
-        .brand-step-panel-inner {
+        .brand-step-card {
             background: #f4f1ec;
             border: 1px solid #ded8d0;
             border-radius: 26px;
-            padding: 24px 26px 28px 26px;
-            margin: 1.25rem 0 1.35rem 0;
+            padding: 24px 26px 18px 26px;
+            margin: 1.25rem 0 0.6rem 0;
             box-shadow: 0 18px 48px rgba(17,24,39,0.16);
         }
 
@@ -734,15 +734,17 @@ st.markdown(
             font-size: 0.95rem;
             line-height: 1.45;
             font-weight: 650;
-            margin-bottom: 14px;
+            margin-bottom: 4px;
         }
 
         .brand-step-helper {
             background: #ffffff;
             border: 1px solid #ded8d0;
-            border-radius: 20px;
-            padding: 18px 20px;
-            box-shadow: 0 12px 30px rgba(17,24,39,0.07);
+            border-radius: 26px;
+            padding: 24px 26px;
+            margin: 1.25rem 0 0.6rem 0;
+            min-height: 166px;
+            box-shadow: 0 18px 48px rgba(17,24,39,0.12);
         }
 
         .brand-step-helper strong {
@@ -1272,46 +1274,43 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-brand_box = st.container()
-with brand_box:
-    st.markdown('<div class="brand-step-panel-inner">', unsafe_allow_html=True)
+brand_left, brand_right = st.columns([1.35, 1], gap="large")
 
-    brand_left, brand_right = st.columns([1.35, 1], gap="large")
-
-    with brand_left:
-        st.markdown(
-            """
+with brand_left:
+    st.markdown(
+        """
+        <div class="brand-step-card">
             <div class="brand-step-eyebrow">Step 1</div>
             <div class="brand-step-title">Enter your Amazon brand name</div>
             <div class="brand-step-copy">
                 This name will be used in your audit preview and final report.
             </div>
-            """,
-            unsafe_allow_html=True,
-        )
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
-        brand_name_input = st.text_input(
-            "Amazon Brand Name",
-            value=st.session_state.get("lead_brand_name", ""),
-            placeholder="Example: Acme Naturals",
-            key="sales_audit_brand_name",
-            label_visibility="collapsed",
-        )
+    brand_name_input = st.text_input(
+        "Amazon Brand Name",
+        value=st.session_state.get("lead_brand_name", ""),
+        placeholder="Example: Acme Naturals",
+        key="sales_audit_brand_name",
+        label_visibility="collapsed",
+    )
 
-    with brand_right:
-        st.markdown(
-            """
-            <div class="brand-step-helper">
-                <strong>Then upload your reports</strong>
-                <span>
-                    Once the five required files are added, the audit button will unlock and generate your preview.
-                </span>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-
-    st.markdown("</div>", unsafe_allow_html=True)
+with brand_right:
+    st.markdown(
+        """
+        <div class="brand-step-helper">
+            <div class="brand-step-eyebrow">Step 2</div>
+            <strong>Then upload your reports</strong>
+            <span>
+                Once the five required files are added, the audit button will unlock and generate your preview.
+            </span>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
 st.markdown("#### Required Reports")
 u1, u2 = st.columns(2, gap="large")
