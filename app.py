@@ -647,10 +647,6 @@ st.markdown(
             box-shadow: 0 26px 80px rgba(17, 24, 39, 0.18);
         }
 
-        .audit-form-header {
-            margin-bottom: 1.35rem;
-        }
-
         .audit-form-title {
             font-size: 2.05rem;
             line-height: 1;
@@ -696,17 +692,28 @@ st.markdown(
             font-weight: 800;
         }
 
-        /* Native Streamlit bordered containers used for Step 1 / Step 2 */
-        div[data-testid="stVerticalBlockBorderWrapper"] {
-            background: #f4f1ec !important;
-            border: 1px solid #ded8d0 !important;
-            border-radius: 26px !important;
-            padding: 22px 24px 24px 24px !important;
-            box-shadow: 0 18px 48px rgba(17,24,39,0.16) !important;
+        .brand-entry-card {
+            display: grid;
+            grid-template-columns: 1.35fr 1fr;
+            gap: 24px;
+            background: #f4f1ec;
+            border: 1px solid #ded8d0;
+            border-radius: 28px;
+            padding: 26px;
+            margin: 1.25rem 0 0.75rem 0;
+            box-shadow: 0 18px 48px rgba(17,24,39,0.16);
         }
 
-        .brand-native-card {
-            margin-bottom: 14px;
+        .brand-entry-left,
+        .brand-entry-right {
+            background: rgba(255,255,255,0.56);
+            border: 1px solid rgba(222,216,208,0.95);
+            border-radius: 22px;
+            padding: 22px 24px;
+        }
+
+        .brand-entry-right {
+            background: #ffffff;
         }
 
         .brand-step-eyebrow {
@@ -783,14 +790,6 @@ st.markdown(
             transform: translateY(-1px);
         }
 
-        .section-note {
-            font-size: 0.96rem;
-            color: var(--ec-muted);
-            margin-bottom: 1rem;
-            line-height: 1.5;
-            font-weight: 500;
-        }
-
         .metric-card {
             background: var(--ec-card);
             border: 1px solid var(--ec-border);
@@ -798,13 +797,6 @@ st.markdown(
             padding: 17px 18px;
             box-shadow: 0 14px 38px rgba(17,17,17,0.07);
             min-height: 104px;
-            transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
-        }
-
-        .metric-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 20px 48px rgba(17,17,17,0.10);
-            border-color: rgba(255, 106, 0, 0.38);
         }
 
         .metric-label {
@@ -941,40 +933,16 @@ st.markdown(
 
         div[data-testid="stTextInput"] label {
             font-weight: 900 !important;
-            color: #ffffff !important;
+            color: #1f2833 !important;
             margin-bottom: 0.45rem !important;
         }
 
-        /* Make the brand name field fit inside the cream box */
-        div[data-testid="stVerticalBlockBorderWrapper"] .stTextInput input {
-            background: #ffffff !important;
-            color: #1f2833 !important;
-            border: 1px solid #d9d3ca !important;
-            border-radius: 16px !important;
-            min-height: 54px !important;
-            height: 54px !important;
-            padding: 0 18px !important;
-            font-size: 1rem !important;
-            font-weight: 650 !important;
-            box-shadow: 0 8px 20px rgba(17,24,39,0.08) !important;
-        }
-
-        div[data-testid="stVerticalBlockBorderWrapper"] .stTextInput input::placeholder {
-            color: #6b7280 !important;
-            opacity: 1 !important;
-        }
-
-        div[data-testid="stVerticalBlockBorderWrapper"] .stTextInput input:focus {
-            border-color: #ff6a00 !important;
-            box-shadow: 0 0 0 4px rgba(255,106,0,0.16), 0 8px 20px rgba(17,24,39,0.08) !important;
-        }
-
-        /* Default text input styling elsewhere */
         .stTextInput input {
             border-radius: 18px !important;
             border: 1px solid #d9d3ca !important;
             min-height: 58px !important;
-            padding-left: 18px !important;
+            height: 58px !important;
+            padding: 0 18px !important;
             font-size: 1rem !important;
             background: #ffffff !important;
             color: #1f2833 !important;
@@ -991,11 +959,36 @@ st.markdown(
             box-shadow: 0 0 0 4px rgba(255,106,0,0.16), 0 10px 26px rgba(17,24,39,0.08) !important;
         }
 
-        div[data-testid="stTextInput"]:has(input[aria-label="Full Name"]) label,
-        div[data-testid="stTextInput"]:has(input[aria-label="Phone Number"]) label,
-        div[data-testid="stTextInput"]:has(input[aria-label="Work Email"]) label,
-        div[data-testid="stTextInput"]:has(input[aria-label="Brand Name"]) label {
+        /* The Amazon brand input */
+        div[data-testid="stTextInput"]:has(input[aria-label="Amazon Brand Name"]) {
+            margin-top: 0 !important;
+            margin-bottom: 1.5rem !important;
+        }
+
+        div[data-testid="stTextInput"]:has(input[aria-label="Amazon Brand Name"]) input {
+            background: #ffffff !important;
             color: #1f2833 !important;
+            border: 2px solid rgba(255,106,0,0.60) !important;
+            border-radius: 18px !important;
+            min-height: 66px !important;
+            height: 66px !important;
+            padding: 0 22px !important;
+            font-size: 1.08rem !important;
+            font-weight: 750 !important;
+            line-height: 66px !important;
+            box-shadow: 0 14px 34px rgba(0,0,0,0.16) !important;
+            overflow: visible !important;
+        }
+
+        div[data-testid="stTextInput"]:has(input[aria-label="Amazon Brand Name"]) input::placeholder {
+            color: #374151 !important;
+            opacity: 1 !important;
+            font-weight: 700 !important;
+        }
+
+        div[data-testid="stTextInput"]:has(input[aria-label="Amazon Brand Name"]) input:focus {
+            border-color: #ff6a00 !important;
+            box-shadow: 0 0 0 4px rgba(255,106,0,0.22), 0 14px 34px rgba(0,0,0,0.16) !important;
         }
 
         [data-testid="stFileUploader"] {
@@ -1145,6 +1138,10 @@ st.markdown(
             .brand-title {
                 font-size: 3.1rem;
             }
+
+            .brand-entry-card {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
     """,
@@ -1287,19 +1284,39 @@ st.markdown(hero_html, unsafe_allow_html=True)
 st.markdown(
     """
     <div class="audit-form-card">
-        <div class="audit-form-header">
-            <div class="audit-form-title">Start Your Free Audit</div>
-            <div class="audit-form-subtitle">
-                Add your brand name and upload the five required Amazon reports. We’ll use them to find wasted spend,
-                winning terms, campaign issues, and growth opportunities.
+        <div class="audit-form-title">Start Your Free Audit</div>
+        <div class="audit-form-subtitle">
+            Add your brand name and upload the five required Amazon reports. We’ll use them to find wasted spend,
+            winning terms, campaign issues, and growth opportunities.
+        </div>
+        <div class="required-pill-row">
+            <span class="required-pill">Bulk Sheet</span>
+            <span class="required-pill">SP Search Terms</span>
+            <span class="required-pill">SP Targeting</span>
+            <span class="required-pill">SP Impression Share</span>
+            <span class="required-pill">Sales & Traffic</span>
+            <span class="required-pill">SB Optional</span>
+        </div>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+
+st.markdown(
+    """
+    <div class="brand-entry-card">
+        <div class="brand-entry-left">
+            <div class="brand-step-eyebrow">Step 1</div>
+            <div class="brand-step-title">Enter your Amazon brand name</div>
+            <div class="brand-step-copy">
+                This name will be used in your audit preview and final report.
             </div>
-            <div class="required-pill-row">
-                <span class="required-pill">Bulk Sheet</span>
-                <span class="required-pill">SP Search Terms</span>
-                <span class="required-pill">SP Targeting</span>
-                <span class="required-pill">SP Impression Share</span>
-                <span class="required-pill">Sales & Traffic</span>
-                <span class="required-pill">SB Optional</span>
+        </div>
+        <div class="brand-entry-right">
+            <div class="brand-step-eyebrow">Step 2</div>
+            <div class="brand-step-title small">Then upload your reports</div>
+            <div class="brand-step-copy">
+                Once the five required files are added, the audit button will unlock and generate your preview.
             </div>
         </div>
     </div>
@@ -1307,45 +1324,13 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-brand_left, brand_right = st.columns([1.35, 1], gap="large")
-
-with brand_left:
-    with st.container(border=True):
-        st.markdown(
-            """
-            <div class="brand-native-card">
-                <div class="brand-step-eyebrow">Step 1</div>
-                <div class="brand-step-title">Enter your Amazon brand name</div>
-                <div class="brand-step-copy">
-                    This name will be used in your audit preview and final report.
-                </div>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-
-        brand_name_input = st.text_input(
-            "Amazon Brand Name",
-            value=st.session_state.get("lead_brand_name", ""),
-            placeholder="Example: Acme Naturals",
-            key="sales_audit_brand_name",
-            label_visibility="collapsed",
-        )
-
-with brand_right:
-    with st.container(border=True):
-        st.markdown(
-            """
-            <div class="brand-native-card">
-                <div class="brand-step-eyebrow">Step 2</div>
-                <div class="brand-step-title small">Then upload your reports</div>
-                <div class="brand-step-copy">
-                    Once the five required files are added, the audit button will unlock and generate your preview.
-                </div>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
+brand_name_input = st.text_input(
+    "Amazon Brand Name",
+    value=st.session_state.get("lead_brand_name", ""),
+    placeholder="Example: Acme Naturals",
+    key="sales_audit_brand_name",
+    label_visibility="collapsed",
+)
 
 st.markdown(
     '<div class="dark-section-heading">Required Reports</div>',
