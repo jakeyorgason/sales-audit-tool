@@ -957,34 +957,45 @@ st.markdown(
         div[data-testid="stTextInput"] {
             max-width: 100%;
         }
-
+        
+        /* Labels */
         div[data-testid="stTextInput"] label {
             font-weight: 900 !important;
             color: #ffffff !important;
             margin-bottom: 0.45rem !important;
         }
-
+        
+        /* Main input styling */
         .stTextInput input {
             border-radius: 18px !important;
-            border: 1px solid rgba(255,255,255,0.14) !important;
-            min-height: 58px !important;
-            padding-left: 18px !important;
-            font-size: 1rem !important;
-            background: rgba(255,255,255,0.08) !important;
-            color: #ffffff !important;
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 10px 26px rgba(0,0,0,0.12) !important;
+            border: 2px solid rgba(255,106,0,0.55) !important;
+            min-height: 82px !important;
+            height: 82px !important;
+            padding-left: 22px !important;
+            padding-right: 22px !important;
+            font-size: 1.08rem !important;
+            font-weight: 700 !important;
+            background: #ffffff !important;
+            color: #1f2833 !important;
+            box-shadow: 0 14px 34px rgba(0,0,0,0.16) !important;
         }
-
+        
+        /* Placeholder text */
         .stTextInput input::placeholder {
-            color: rgba(255,255,255,0.55) !important;
+            color: #6b7280 !important;
+            opacity: 1 !important;
+            font-weight: 650 !important;
         }
-
+        
+        /* Focus state */
         .stTextInput input:focus {
-            background: rgba(255,255,255,0.12) !important;
+            background: #ffffff !important;
+            color: #1f2833 !important;
             border-color: #ff6a00 !important;
-            box-shadow: 0 0 0 4px rgba(255,106,0,0.18), 0 10px 26px rgba(0,0,0,0.14) !important;
+            box-shadow: 0 0 0 4px rgba(255,106,0,0.22), 0 14px 34px rgba(0,0,0,0.16) !important;
         }
-
+        
+        /* Lead form inputs after the audit runs */
         div[data-testid="stTextInput"]:has(input[aria-label="Full Name"]) input,
         div[data-testid="stTextInput"]:has(input[aria-label="Phone Number"]) input,
         div[data-testid="stTextInput"]:has(input[aria-label="Work Email"]) input,
@@ -994,7 +1005,7 @@ st.markdown(
             border: 1px solid #d9d3ca !important;
             box-shadow: 0 10px 26px rgba(17,24,39,0.08) !important;
         }
-
+        
         div[data-testid="stTextInput"]:has(input[aria-label="Full Name"]) label,
         div[data-testid="stTextInput"]:has(input[aria-label="Phone Number"]) label,
         div[data-testid="stTextInput"]:has(input[aria-label="Work Email"]) label,
