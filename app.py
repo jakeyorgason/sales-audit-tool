@@ -85,6 +85,17 @@ def load_banner_path() -> Optional[str]:
             return path
     return None
 
+def load_full_logo_path() -> Optional[str]:
+    possible_paths = [
+        "assets/ec_full.png",
+        "assets/ec_full.jpg",
+        "ec_full.png",
+    ]
+    for path in possible_paths:
+        if os.path.exists(path):
+            return path
+    return None
+
 
 def image_to_base64_src(path: Optional[str]) -> str:
     if not path or not os.path.exists(path):
@@ -450,6 +461,10 @@ st.markdown(
             max-width: 42vw;
             height: auto;
             display: block;
+        }
+
+        .hero-logo-full {
+            display: none;
         }
 
         .hero-banner-wrap {
@@ -1406,12 +1421,20 @@ Use matching date ranges where possible. The Sponsored Brands report helps popul
 logo_path = load_logo_path()
 logo_src = image_to_base64_src(logo_path)
 
+full_logo_path = load_full_logo_path()
+full_logo_src = image_to_base64_src(full_logo_path)
+
 banner_path = load_banner_path()
 banner_src = image_to_base64_src(banner_path)
 
 logo_html = ""
 if logo_src:
-    logo_html = f'<img src="{logo_src}" class="hero-logo" alt="Evolved Commerce logo">'
+    logo_html = f'''
+        <picture>
+            <source media="(max-width: 1320px)" srcset="{full_logo_src}">
+            <img src="{logo_src}" class="hero-logo" alt="Evolved Commerce logo">
+        </picture>
+    '''
 
 banner_html = ""
 if banner_src:
